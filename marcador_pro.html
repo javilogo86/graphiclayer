@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Marcador Pro</title>
+
+<style>
+body {
+    margin: 0;
+    background: transparent;
+    font-family: Arial, sans-serif;
+}
+
+/* MARCADOR */
+#scoreboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 600px;
+    margin: 20px auto;
+    background: rgba(0,0,0,0.75);
+    padding: 10px 20px;
+    border-radius: 12px;
+    color: white;
+}
+
+.team {
+    font-size: 22px;
+    width: 35%;
+    text-align: center;
+}
+
+.score {
+    font-size: 40px;
+    font-weight: bold;
+}
+
+#time {
+    text-align: center;
+    font-size: 26px;
+    margin-top: 5px;
+    color: white;
+}
+
+/* PANEL CONTROL (oculto en stream) */
+#controls {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.8);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+button {
+    margin: 3px;
+    padding: 8px;
+    font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="scoreboard">
+    <div class="team" id="teamA">EQUIPO A</div>
+    <div class="score" id="score">0 - 0</div>
+    <div class="team" id="teamB">EQUIPO B</div>
+</div>
+
+<div id="time">00:00</div>
+
+<!-- CONTROLES -->
+<div id="controls">
+    <div>
+        <button onclick="goalA()">+1 A</button>
+        <button onclick="minusA()">-1 A</button>
+    </div>
+    <div>
+        <button onclick="goalB()">+1 B</button>
+        <button onclick="minusB()">-1 B</button>
+    </div>
+    <div>
+        <button onclick="resetGame()">RESET</button>
+    </div>
+</div>
+
+<script>
+let scoreA = 0;
+let scoreB = 0;
+let seconds = 0;
+let running = true;
+
+/* ACTUALIZAR MARCADOR */
+function updateScore() {
+    document.getElementById("score").innerText = scoreA + " - " + scoreB;
+}
+
+/* GOLES */
+function goalA() { scoreA++; updateScore(); }
+function goalB() { scoreB++; updateScore(); }
+function minusA() { if(scoreA>0) scoreA--; updateScore(); }
+function minusB() { if(scoreB>0) scoreB--; updateScore(); }
+
+/* RESET */
+function resetGame() {
+    scoreA = 0;
+    scoreB = 0;
+    seconds = 0;
+    updateScore();
+}
+
+/* TIEMPO */
+setInterval(() => {
+    if(running){
+        seconds++;
+        let min = String(Math.floor(seconds / 60)).padStart(2, '0');
+        let sec = String(seconds % 60).padStart(2, '0');
+        document.getElementById("time").innerText = min + ":" + sec;
+    }
+}, 1000);
+</script>
+
+</body>
+</html>
