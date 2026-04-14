@@ -1,0 +1,45 @@
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+const firebaseConfig = {
+  databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* FUNCIONES */
+function goalA(){
+  db.ref("match/scoreA").transaction(n => (n || 0) + 1);
+}
+
+function goalB(){
+  db.ref("match/scoreB").transaction(n => (n || 0) + 1);
+}
+
+function minusA(){
+  db.ref("match/scoreA").transaction(n => Math.max((n||0)-1,0));
+}
+
+function minusB(){
+  db.ref("match/scoreB").transaction(n => Math.max((n||0)-1,0));
+}
+
+function resetGame(){
+  db.ref("match").update({
+    scoreA: 0,
+    scoreB: 0,
+    time: 0
+  });
+}
+
+/* CRONÓMETRO */
+let running = true;
+
+setInterval(() => {
+  if(running){
+    db.ref("match/time").transaction(t => (t || 0) + 1);
+  }
+}, 1000);
+</script>
