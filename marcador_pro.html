@@ -1,24 +1,88 @@
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Marcador en Tiempo Real</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #111;
+      color: #fff;
+    }
+    .scoreboard {
+      margin-top: 50px;
+      font-size: 2rem;
+    }
+    .time {
+      font-size: 1.5rem;
+      margin-top: 10px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
 
-<script>
-const firebaseConfig = {
-  databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
-};
+  <div class="scoreboard">
+    <div id="teamA">-</div>
+    <div id="score">0 - 0</div>
+    <div id="teamB">-</div>
+    <div id="time" class="time">00:00</div>
+  </div>
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-/* ESCUCHAR CAMBIOS */
-db.ref("match").on("value", snapshot => {
-    const data = snapshot.val();
+  <script>
+    const firebaseConfig = {
+      databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
+    };
 
-    document.getElementById("teamA").innerText = data.teamA;
-    document.getElementById("teamB").innerText = data.teamB;
-    document.getElementById("score").innerText = data.scoreA + " - " + data.scoreB;
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    let min = String(Math.floor(data.time / 60)).padStart(2, '0');
-    let sec = String(data.time % 60).padStart(2, '0');
-    document.getElementById("time").innerText = min + ":" + sec;
-});
-</script>
+    // Cachear elementos del DOM
+    const elTeamA = document.getElementById("teamA");
+    const elTeamB = document.getElementById("teamB");
+    const elScore = document.getElementById("score");
+    const elTime = document.getElementById("time");
+
+    // Escuchar cambios en tiempo real
+    db.ref("match").on("value", snapshot => {
+      try {
+        const data = snapshot.val();
+
+        // Validar datos
+        if (!data) {
+          console.warn("No hay datos en 'match'");
+          return;
+        }
+
+        // Equipos
+        elTeamA.innerText = data.teamA || "-";
+        elTeamB.innerText = data.teamB || "-";
+
+        // Marcador
+        const scoreA = data.scoreA ?? 0;
+        const scoreB = data.scoreB ?? 0;
+        elScore.innerText = `${scoreA} - ${scoreB}`;
+
+        // Tiempo
+        const time = data.time ?? 0;
+        const min = String(Math.floor(time / 60)).padStart(2, '0');
+        const sec = String(time % 60).padStart(2, '0');
+        elTime.innerText = `${min}:${sec}`;
+
+      } catch (error) {
+        console.error("Error procesando datos:", error);
+      }
+
+    }, error => {
+      console.error("Error de Firebase:", error);
+    });
+  </script>
+
+</body>
+</html>
