@@ -89,9 +89,12 @@ window.reset = () => {
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
 
+/* FORMATO TIEMPO */
 function format(ms){
-  const s=Math.floor(ms/1000);
-  return String(Math.floor(s/60)).padStart(2,'0')+":"+String(s%60).padStart(2,'0');
+  const s = Math.floor(ms/1000);
+  const m = String(Math.floor(s/60)).padStart(2,'0');
+  const sec = String(s%60).padStart(2,'0');
+  return `${m}:${sec}`;
 }
 
 onValue(matchRef, snap=>{
@@ -99,11 +102,24 @@ onValue(matchRef, snap=>{
 
   scoreEl.innerText=`${d.scoreA||0} - ${d.scoreB||0}`;
 
-  let t=d.elapsed||0;
+ /* let t=d.elapsed||0;
   if(d.isRunning && d.startTime) t+=Date.now()-d.startTime;
 
-  timeEl.innerText=format(t);
+  timeEl.innerText=format(t);*/
 });
+/* ⏱️ RENDER EN TIEMPO REAL */
+setInterval(()=>{
+  if(!matchData) return;
+
+  let t = matchData.elapsed || 0;
+
+  if(matchData.isRunning && matchData.startTime){
+    t += Date.now() - matchData.startTime;
+  }
+
+  time.innerText = format(t);
+
+}, 1000);  
 
 </script>
 </body>
