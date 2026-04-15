@@ -38,23 +38,40 @@ const tB=document.getElementById("teamB");
 const score=document.getElementById("score");
 const time=document.getElementById("time");
 
+  let matchData = null;
+
+/* FORMATO TIEMPO */
 function format(ms){
-  const s=Math.floor(ms/1000);
-  return String(Math.floor(s/60)).padStart(2,'0')+":"+String(s%60).padStart(2,'0');
+  const s = Math.floor(ms/1000);
+  const m = String(Math.floor(s/60)).padStart(2,'0');
+  const sec = String(s%60).padStart(2,'0');
+  return `${m}:${sec}`;
 }
 
+/* ESCUCHAR FIREBASE */
 onValue(matchRef, snap=>{
-  const d=snap.val(); if(!d) return;
+  matchData = snap.val();
+  if(!matchData) return;
 
-  tA.innerText=d.teamA||"-";
-  tB.innerText=d.teamB||"-";
-  score.innerText=`${d.scoreA||0} - ${d.scoreB||0}`;
+  // SOLO datos estáticos
+  if(tA) tA.innerText = matchData.teamA || "-";
+  if(tB) tB.innerText = matchData.teamB || "-";
 
-  let t=d.elapsed||0;
-  if(d.isRunning && d.startTime) t+=Date.now()-d.startTime;
-
-  time.innerText=format(t);
+  score.innerText = `${matchData.scoreA||0} - ${matchData.scoreB||0}`;
 });
+  /* ⏱️ RENDER EN TIEMPO REAL */
+setInterval(()=>{
+  if(!matchData) return;
+
+  let t = matchData.elapsed || 0;
+
+  if(matchData.isRunning && matchData.startTime){
+    t += Date.now() - matchData.startTime;
+  }
+
+  time.innerText = format(t);
+
+}, 1000);
 
 </script>
 </body>
