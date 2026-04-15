@@ -9,37 +9,91 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* FUNCIONES */
+/* =========================
+   FUNCIONES DE MARCADOR
+========================= */
+
 function goalA(){
-  db.ref("match/scoreA").transaction(n => (n || 0) + 1);
+  db.ref("match/scoreA").transaction(n => {
+    return (typeof n === "number" ? n : 0) + 1;
+  }, handleError);
 }
 
 function goalB(){
-  db.ref("match/scoreB").transaction(n => (n || 0) + 1);
+  db.ref("match/scoreB").transaction(n => {
+    return (typeof n === "number" ? n : 0) + 1;
+  }, handleError);
 }
 
 function minusA(){
-  db.ref("match/scoreA").transaction(n => Math.max((n||0)-1,0));
+  db.ref("match/scoreA").transaction(n => {
+    const val = (typeof n === "number" ? n : 0) - 1;
+    return Math.max(val, 0);
+  }, handleError);
 }
 
 function minusB(){
-  db.ref("match/scoreB").transaction(n => Math.max((n||0)-1,0));
+  db.ref("match/scoreB").transaction(n => {
+    const val = (typeof n === "number" ? n : 0) - 1;
+    return Math.max(val, 0);
+  }, handleError);
 }
 
 function resetGame(){
   db.ref("match").update({
     scoreA: 0,
     scoreB: 0,
-    time: 0
-  });
+    time: 0,
+    running: false
+  }).catch(handleError);
 }
 
-/* CRONÓMETRO */
-let running = true;
+/* =========================
+   CRONÓMETRO SINCRONIZADO
+========================= */
 
-setInterval(() => {
-  if(running){
-    db.ref("match/time").transaction(t => (t || 0) + 1);
+// IMPORTANTE: el estado running está en Firebase
+let intervalId = null;
+
+// Escuchar estado del partido
+db.ref("match/running").on("value", snapshot => {
+  const running = snapshot.val();
+
+  // Si ya hay un intervalo activo, lo limpiamos
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
   }
-}, 1000);
+
+  if (running) {
+    intervalId = setInterval(() => {
+      db.ref("match/time").transaction(t => {
+        return (typeof t === "number" ? t : 0) + 1;
+      }, handleError);
+    }, 1000);
+  }
+}, handleError);
+
+/* =========================
+   CONTROL DEL CRONO
+========================= */
+
+function startTimer(){
+  db.ref("match/running").set(true).catch(handleError);
+}
+
+function stopTimer(){
+  db.ref("match/running").set(false).catch(handleError);
+}
+
+/* =========================
+   ERROR HANDLER GLOBAL
+========================= */
+
+function handleError(error){
+  if (error) {
+    console.error("Firebase error:", error);
+  }
+}
+
 </script>
