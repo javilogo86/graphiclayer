@@ -71,6 +71,9 @@ input {
 <div class="grid">
   <button class="green" onclick="goalA()">+ A</button>
   <button class="green" onclick="goalB()">+ B</button>
+  <!-- ➖ NUEVOS BOTONES -->
+  <button class="red" onclick="minusA()">- A</button>
+  <button class="red" onclick="minusB()">- B</button>
   <button class="blue" onclick="start()">▶ Start</button>
   <button class="red" onclick="pause()">⏸ Pause</button>
   <button class="gray" onclick="reset()">Reset</button>
@@ -90,6 +93,12 @@ const matchRef = ref(db, "match");
 
 window.goalA = () => runTransaction(ref(db,"match/scoreA"), n => (n||0)+1);
 window.goalB = () => runTransaction(ref(db,"match/scoreB"), n => (n||0)+1);
+
+window.minusA = () =>
+  runTransaction(ref(db,"match/scoreA"), n => Math.max((n || 0) - 1, 0));
+
+window.minusB = () =>
+  runTransaction(ref(db,"match/scoreB"), n => Math.max((n || 0) - 1, 0));
 
 window.setTeams = () => {
   update(matchRef, {
