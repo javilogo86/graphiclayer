@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Marcador</title>
+
+<style>
+body { background:black; color:white; text-align:center; font-family:Arial; }
+.teams { font-size:40px; margin-top:40px; }
+.score { font-size:80px; margin:20px; }
+.time { font-size:50px; color:#ccc; }
+</style>
+</head>
+
+<body>
+
+<div class="teams">
+  <span id="teamA">-</span> vs <span id="teamB">-</span>
+</div>
+
+<div class="score" id="score">0 - 0</div>
+<div class="time" id="time">00:00</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, onValue } 
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+const app = initializeApp({
+  databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
+});
+
+const db = getDatabase(app);
+const matchRef = ref(db,"match");
+
+const tA=document.getElementById("teamA");
+const tB=document.getElementById("teamB");
+const score=document.getElementById("score");
+const time=document.getElementById("time");
+
+function format(ms){
+  const s=Math.floor(ms/1000);
+  return String(Math.floor(s/60)).padStart(2,'0')+":"+String(s%60).padStart(2,'0');
+}
+
+onValue(matchRef, snap=>{
+  const d=snap.val(); if(!d) return;
+
+  tA.innerText=d.teamA||"-";
+  tB.innerText=d.teamB||"-";
+  score.innerText=`${d.scoreA||0} - ${d.scoreB||0}`;
+
+  let t=d.elapsed||0;
+  if(d.isRunning && d.startTime) t+=Date.now()-d.startTime;
+
+  time.innerText=format(t);
+});
+
+</script>
+</body>
+</html>
