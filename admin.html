@@ -1,40 +1,3 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Panel Árbitro</title>
-
-<style>
-body { font-family: Arial; text-align:center; background:#111; color:#fff; }
-button { padding:15px; margin:10px; font-size:18px; border:none; border-radius:8px; cursor:pointer; }
-.goal { background:green; }
-.control { background:blue; }
-.reset { background:red; }
-.score { font-size:50px; }
-.time { font-size:40px; }
-</style>
-</head>
-
-<body>
-
-<h1>👨‍⚖️ Árbitro</h1>
-
-<input id="teamA" placeholder="Equipo A">
-<input id="teamB" placeholder="Equipo B">
-<button onclick="setTeams()">Guardar equipos</button>
-
-<div class="score" id="score">0 - 0</div>
-<div class="time" id="time">00:00</div>
-
-<button class="goal" onclick="goalA()">+ A</button>
-<button class="goal" onclick="goalB()">+ B</button>
-
-<br>
-
-<button class="control" onclick="start()">▶️ Start</button>
-<button class="control" onclick="pause()">⏸️ Pause</button>
-<button class="reset" onclick="reset()">🔄 Reset</button>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, update, runTransaction, onValue } 
@@ -47,7 +10,7 @@ const app = initializeApp({
 const db = getDatabase(app);
 const matchRef = ref(db, "match");
 
-/* FUNCIONES */
+/* ================= FUNCIONES ================= */
 
 window.goalA = () => runTransaction(ref(db,"match/scoreA"), n => (n||0)+1);
 window.goalB = () => runTransaction(ref(db,"match/scoreB"), n => (n||0)+1);
@@ -84,10 +47,13 @@ window.reset = () => {
   });
 };
 
-/* UI */
+/* ================= UI ================= */
 
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
+
+// 🔥 IMPORTANTE: estado global
+let matchData = null;
 
 /* FORMATO TIEMPO */
 function format(ms){
@@ -97,16 +63,14 @@ function format(ms){
   return `${m}:${sec}`;
 }
 
+/* ESCUCHAR FIREBASE */
 onValue(matchRef, snap=>{
-  const d=snap.val(); if(!d) return;
+  matchData = snap.val(); // 🔥 AQUÍ ESTÁ LA CLAVE
+  if(!matchData) return;
 
-  scoreEl.innerText=`${d.scoreA||0} - ${d.scoreB||0}`;
-
- /* let t=d.elapsed||0;
-  if(d.isRunning && d.startTime) t+=Date.now()-d.startTime;
-
-  timeEl.innerText=format(t);*/
+  scoreEl.innerText = `${matchData.scoreA||0} - ${matchData.scoreB||0}`;
 });
+
 /* ⏱️ RENDER EN TIEMPO REAL */
 setInterval(()=>{
   if(!matchData) return;
@@ -117,10 +81,8 @@ setInterval(()=>{
     t += Date.now() - matchData.startTime;
   }
 
-  time.innerText = format(t);
+  timeEl.innerText = format(t); // 🔥 corregido
 
-}, 1000);  
+}, 1000);
 
 </script>
-</body>
-</html>
