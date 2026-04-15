@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Panel Árbitro</title>
+
+<style>
+body { font-family: Arial; text-align:center; background:#111; color:#fff; }
+button { padding:15px; margin:10px; font-size:18px; border:none; border-radius:8px; cursor:pointer; }
+.goal { background:green; }
+.control { background:blue; }
+.reset { background:red; }
+.score { font-size:50px; }
+.time { font-size:40px; }
+</style>
+</head>
+
+<body>
+
+<h1>👨‍⚖️ Árbitro</h1>
+
+<input id="teamA" placeholder="Equipo A">
+<input id="teamB" placeholder="Equipo B">
+<button onclick="setTeams()">Guardar equipos</button>
+
+<div class="score" id="score">0 - 0</div>
+<div class="time" id="time">00:00</div>
+
+<button class="goal" onclick="goalA()">+ A</button>
+<button class="goal" onclick="goalB()">+ B</button>
+
+<br>
+
+<button class="control" onclick="start()">▶️ Start</button>
+<button class="control" onclick="pause()">⏸️ Pause</button>
+<button class="reset" onclick="reset()">🔄 Reset</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, update, runTransaction, onValue } 
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+const app = initializeApp({
+  databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
+});
+
+const db = getDatabase(app);
+const matchRef = ref(db, "match");
+
+/* FUNCIONES */
+
+window.goalA = () => runTransaction(ref(db,"match/scoreA"), n => (n||0)+1);
+window.goalB = () => runTransaction(ref(db,"match/scoreB"), n => (n||0)+1);
+
+window.setTeams = () => {
+  update(matchRef, {
+    teamA: document.getElementById("teamA").value,
+    teamB: document.getElementById("teamB").value
+  });
+};
+
+window.start = () => {
+  update(matchRef, { startTime: Date.now(), isRunning:true });
+};
+
+window.pause = () => {
+  runTransaction(matchRef, d => {
+    if(!d || !d.startTime) return d;
+    const now = Date.now();
+    return {
+      ...d,
+      elapsed: (d.elapsed||0)+(now-d.startTime),
+      startTime:null,
+      isRunning:false
+    };
+  });
+};
+
+window.reset = () => {
+  update(matchRef,{
+    scoreA:0, scoreB:0,
+    elapsed:0, startTime:null,
+    isRunning:false
+  });
+};
+
+/* UI */
+
+const scoreEl = document.getElementById("score");
+const timeEl = document.getElementById("time");
+
+function format(ms){
+  const s=Math.floor(ms/1000);
+  return String(Math.floor(s/60)).padStart(2,'0')+":"+String(s%60).padStart(2,'0');
+}
+
+onValue(matchRef, snap=>{
+  const d=snap.val(); if(!d) return;
+
+  scoreEl.innerText=`${d.scoreA||0} - ${d.scoreB||0}`;
+
+  let t=d.elapsed||0;
+  if(d.isRunning && d.startTime) t+=Date.now()-d.startTime;
+
+  timeEl.innerText=format(t);
+});
+
+</script>
+</body>
+</html>
