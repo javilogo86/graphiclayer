@@ -1,8 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Panel Árbitro PRO</title>
+
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+  background: radial-gradient(circle, #1a1a1a, #000);
+  color: #fff;
+}
+
+/* SCORE */
+.score {
+  font-size: 70px;
+  font-weight: bold;
+  margin-top: 30px;
+}
+
+/* ⏱️ TV BROADCAST STYLE */
+.time {
+  font-size: 60px;
+  margin-top: 20px;
+  color: #00ffcc;
+  text-shadow: 0 0 10px #00ffcc, 0 0 25px #00ffcc;
+  font-weight: bold;
+  letter-spacing: 2px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.03); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* BUTTONS */
+button {
+  padding: 14px 18px;
+  margin: 8px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.goal { background: #28a745; color: white; }
+.control { background: #007bff; color: white; }
+.reset { background: #dc3545; color: white; }
+
+input {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 6px;
+  border: none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>👨‍⚖️ Árbitro PRO</h1>
+
+<input id="teamA" placeholder="Equipo A">
+<input id="teamB" placeholder="Equipo B">
+<button onclick="setTeams()">Guardar equipos</button>
+
+<div class="score" id="score">0 - 0</div>
+<div class="time" id="time">00:00</div>
+
+<div>
+  <button class="goal" onclick="goalA()">+ A</button>
+  <button class="goal" onclick="goalB()">+ B</button>
+</div>
+
+<div>
+  <button class="control" onclick="start()">▶ Start</button>
+  <button class="control" onclick="pause()">⏸ Pause</button>
+  <button class="reset" onclick="reset()">🔄 Reset</button>
+</div>
+
+<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, update, runTransaction, onValue } 
+import { getDatabase, ref, update, runTransaction, onValue }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+/* ================= FIREBASE ================= */
 const app = initializeApp({
   databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
 });
@@ -12,8 +97,11 @@ const matchRef = ref(db, "match");
 
 /* ================= FUNCIONES ================= */
 
-window.goalA = () => runTransaction(ref(db,"match/scoreA"), n => (n||0)+1);
-window.goalB = () => runTransaction(ref(db,"match/scoreB"), n => (n||0)+1);
+window.goalA = () =>
+  runTransaction(ref(db,"match/scoreA"), n => (n||0)+1);
+
+window.goalB = () =>
+  runTransaction(ref(db,"match/scoreB"), n => (n||0)+1);
 
 window.setTeams = () => {
   update(matchRef, {
@@ -23,27 +111,33 @@ window.setTeams = () => {
 };
 
 window.start = () => {
-  update(matchRef, { startTime: Date.now(), isRunning:true });
+  update(matchRef, {
+    startTime: Date.now(),
+    isRunning: true
+  });
 };
 
 window.pause = () => {
   runTransaction(matchRef, d => {
-    if(!d || !d.startTime) return d;
+    if (!d || !d.startTime) return d;
+
     const now = Date.now();
     return {
       ...d,
-      elapsed: (d.elapsed||0)+(now-d.startTime),
-      startTime:null,
-      isRunning:false
+      elapsed: (d.elapsed || 0) + (now - d.startTime),
+      startTime: null,
+      isRunning: false
     };
   });
 };
 
 window.reset = () => {
-  update(matchRef,{
-    scoreA:0, scoreB:0,
-    elapsed:0, startTime:null,
-    isRunning:false
+  update(matchRef, {
+    scoreA: 0,
+    scoreB: 0,
+    elapsed: 0,
+    startTime: null,
+    isRunning: false
   });
 };
 
@@ -52,37 +146,47 @@ window.reset = () => {
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
 
-// 🔥 IMPORTANTE: estado global
 let matchData = null;
 
 /* FORMATO TIEMPO */
-function format(ms){
-  const s = Math.floor(ms/1000);
-  const m = String(Math.floor(s/60)).padStart(2,'0');
-  const sec = String(s%60).padStart(2,'0');
-  return `${m}:${sec}`;
+function format(ms) {
+  const total = Math.floor(ms / 1000);
+  const m = String(Math.floor(total / 60)).padStart(2, '0');
+  const s = String(total % 60).padStart(2, '0');
+  return `${m}:${s}`;
 }
 
-/* ESCUCHAR FIREBASE */
-onValue(matchRef, snap=>{
-  matchData = snap.val(); // 🔥 AQUÍ ESTÁ LA CLAVE
-  if(!matchData) return;
+/* FIREBASE LISTENER */
+onValue(matchRef, snap => {
+  matchData = snap.val();
+  if (!matchData) return;
 
-  scoreEl.innerText = `${matchData.scoreA||0} - ${matchData.scoreB||0}`;
+  scoreEl.innerText = `${matchData.scoreA || 0} - ${matchData.scoreB || 0}`;
 });
 
-/* ⏱️ RENDER EN TIEMPO REAL */
-setInterval(()=>{
-  if(!matchData) return;
+/* ================= 🎥 TV BROADCAST CLOCK ================= */
+
+/*
+  Render fluido tipo TV:
+  - 10 FPS (100ms)
+  - evita salto visual
+  - cálculo en tiempo real
+*/
+
+setInterval(() => {
+  if (!matchData) return;
 
   let t = matchData.elapsed || 0;
 
-  if(matchData.isRunning && matchData.startTime){
+  if (matchData.isRunning && matchData.startTime) {
     t += Date.now() - matchData.startTime;
   }
 
-  timeEl.innerText = format(t); // 🔥 corregido
+  timeEl.innerText = format(t);
 
-}, 1000);
+}, 100); // 🔥 10 FPS estilo broadcast
 
 </script>
+
+</body>
+</html>
