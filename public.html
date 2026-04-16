@@ -2,83 +2,105 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Live Match</title>
+<title>Public</title>
 
 <style>
 body {
   margin: 0;
-  background: radial-gradient(circle at center, #111, #000);
-  font-family: Arial;
-  color: white;
-  overflow: hidden;
+  background: transparent;
+  font-family: "Arial", sans-serif;
 }
 
-/* CONTAINER */
-.container {
-  height: 100vh;
+/* CONTENEDOR */
+.overlay {
+  position: absolute;
+  top: 30px;
+  left: 30px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
 }
 
-/* TEAMS */
-.teams {
-  font-size: 60px;
-  font-weight: bold;
+/* ⏱️ TIEMPO */
+.time-box {
+  background: #f2f2f2;
+  color: #111;
+  padding: 6px 18px;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  border-radius: 4px 0 0 4px;
+  min-width: 110px;
+  text-align: center;
+}
+
+/* 🔵 BARRA PRINCIPAL */
+.score-box {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(90deg, #0a0f5c, #1c2ad6);
+  color: white;
+  padding: 6px 25px;
+  font-size: 30px;
+  font-weight: 700;
+  gap: 25px;
+}
+
+/* EQUIPOS */
+.team {
+  width: 70px;
+  text-align: center;
   letter-spacing: 2px;
-  opacity: 0.9;
 }
 
-/* SCORE BROADCAST */
+/* SCORE */
 .score {
-  font-size: 140px;
-  font-weight: 900;
-  margin: 20px;
-  color: #fff;
-  text-shadow: 0 0 20px rgba(255,255,255,0.4);
-  animation: pop 0.6s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-@keyframes pop {
-  0% { transform: scale(0.8); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+/* SEPARADOR CENTRAL */
+.sep {
+  opacity: 0.4;
 }
 
-/* TIMER */
-.time {
-  font-size: 60px;
-  color: #00ffcc;
-  text-shadow: 0 0 20px #00ffcc;
-  margin-top: 10px;
+/* 🔴 BARRA FINAL */
+.red-bar {
+  width: 6px;
+  height: 100%;
+  background: #ff2a2a;
 }
 
-/* LIVE INDICATOR */
-.live {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: red;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-weight: bold;
-  animation: blink 1s infinite;
+/* ✨ ANIMACIÓN GOL */
+.goal-flash {
+  animation: goalFlash 0.5s ease;
 }
 
-@keyframes blink {
-  50% { opacity: 0.3; }
+@keyframes goalFlash {
+  0% { transform: scale(1.3); color: #00ffcc; }
+  100% { transform: scale(1); color: white; }
 }
 </style>
 </head>
 
 <body>
 
-<div class="live">🔴 LIVE</div>
+<div class="overlay">
+  <div class="time-box" id="time">00:00</div>
 
-<div class="container">
-  <div class="teams" id="teams">Team A vs Team B</div>
-  <div class="score" id="score">0 - 0</div>
-  <div class="time" id="time">00:00</div>
+  <div class="score-box">
+    <div class="team" id="teamA">RMA</div>
+
+    <div class="score">
+      <span id="scoreA">0</span>
+      <span class="sep">|</span>
+      <span id="scoreB">0</span>
+    </div>
+
+    <div class="team" id="teamB">STU</div>
+  </div>
+
+  <div class="red-bar"></div>
 </div>
 
 <script type="module">
@@ -86,6 +108,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebas
 import { getDatabase, ref, onValue } 
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+/* FIREBASE */
 const app = initializeApp({
   databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
 });
@@ -93,25 +116,62 @@ const app = initializeApp({
 const db = getDatabase(app);
 const matchRef = ref(db, "match");
 
-const teamsEl = document.getElementById("teams");
-const scoreEl = document.getElementById("score");
+/* DOM */
+const teamAEl = document.getElementById("teamA");
+const teamBEl = document.getElementById("teamB");
+const scoreAEl = document.getElementById("scoreA");
+const scoreBEl = document.getElementById("scoreB");
 const timeEl = document.getElementById("time");
 
 let data = null;
+let lastScore = "";
 
+/* ⏱️ FORMATO TIEMPO PRO (90+ añadido) */
 function format(ms){
-  const s = Math.floor(ms/1000);
-  return String(Math.floor(s/60)).padStart(2,'0') + ":" + String(s%60).padStart(2,'0');
+  const totalSec = Math.floor(ms/1000);
+  const min = Math.floor(totalSec/60);
+  const sec = totalSec % 60;
+
+  if(min >= 90){
+    return "90+" + (min - 90);
+  }
+
+  return String(min).padStart(2,'0') + ":" + String(sec).padStart(2,'0');
 }
 
+/* ABREVIAR EQUIPO */
+function shortName(name){
+  if(!name) return "---";
+  return name.substring(0,3).toUpperCase();
+}
+
+/* FIREBASE */
 onValue(matchRef, snap => {
   data = snap.val();
   if(!data) return;
 
-  teamsEl.innerText = `${data.teamA || "-"} vs ${data.teamB || "-"}`;
-  scoreEl.innerText = `${data.scoreA || 0} - ${data.scoreB || 0}`;
+  teamAEl.innerText = shortName(data.teamA);
+  teamBEl.innerText = shortName(data.teamB);
+
+  scoreAEl.innerText = data.scoreA || 0;
+  scoreBEl.innerText = data.scoreB || 0;
+
+  const current = `${data.scoreA}-${data.scoreB}`;
+
+  if(current !== lastScore){
+    scoreAEl.classList.add("goal-flash");
+    scoreBEl.classList.add("goal-flash");
+
+    setTimeout(() => {
+      scoreAEl.classList.remove("goal-flash");
+      scoreBEl.classList.remove("goal-flash");
+    }, 500);
+  }
+
+  lastScore = current;
 });
 
+/* ⏱️ RELOJ FLUIDO */
 setInterval(() => {
   if(!data) return;
 
