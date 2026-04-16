@@ -95,7 +95,6 @@ import {
   get
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-/* 🔥 FIREBASE CONFIG */
 const app = initializeApp({
   databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
 });
@@ -103,13 +102,13 @@ const app = initializeApp({
 const db = getDatabase(app);
 const matchRef = ref(db, "match");
 
-/* ================= GOLES ================= */
-
+/* ⚽ GOLES */
 window.goalA = async () => {
   await runTransaction(ref(db,"match/scoreA"), n => (n||0)+1);
 
   await update(matchRef, {
     lastEvent: {
+      id: Date.now(),
       type: "goal",
       team: "A",
       timestamp: Date.now()
@@ -122,6 +121,7 @@ window.goalB = async () => {
 
   await update(matchRef, {
     lastEvent: {
+      id: Date.now(),
       type: "goal",
       team: "B",
       timestamp: Date.now()
@@ -129,16 +129,14 @@ window.goalB = async () => {
   });
 };
 
-/* ================= RESTAR ================= */
-
+/* ➖ RESTA */
 window.minusA = () =>
   runTransaction(ref(db,"match/scoreA"), n => Math.max((n||0)-1,0));
 
 window.minusB = () =>
   runTransaction(ref(db,"match/scoreB"), n => Math.max((n||0)-1,0));
 
-/* ================= EQUIPOS ================= */
-
+/* 🏷️ EQUIPOS */
 window.setTeams = () => {
   update(matchRef, {
     teamA: document.getElementById("teamA").value,
@@ -146,8 +144,7 @@ window.setTeams = () => {
   });
 };
 
-/* ================= START ================= */
-
+/* ▶ START */
 window.start = () => {
   update(matchRef, {
     startTime: Date.now(),
@@ -155,8 +152,7 @@ window.start = () => {
   });
 };
 
-/* ================= PAUSE (FIX IMPORTANTE) ================= */
-
+/* ⏸ PAUSE */
 window.pause = async () => {
   const snap = await get(matchRef);
   const d = snap.val();
@@ -172,8 +168,7 @@ window.pause = async () => {
   });
 };
 
-/* ================= RESET ================= */
-
+/* 🔄 RESET */
 window.reset = () => {
   update(matchRef, {
     scoreA: 0,
@@ -185,8 +180,7 @@ window.reset = () => {
   });
 };
 
-/* ================= UI ================= */
-
+/* UI */
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
 
@@ -198,7 +192,6 @@ function format(ms){
          String(s%60).padStart(2,'0');
 }
 
-/* 🔄 LISTENER */
 onValue(matchRef, snap => {
   data = snap.val();
   if(!data) return;
@@ -206,7 +199,6 @@ onValue(matchRef, snap => {
   scoreEl.innerText = `${data.scoreA||0} - ${data.scoreB||0}`;
 });
 
-/* ⏱️ TIMER */
 setInterval(() => {
   if(!data) return;
 
@@ -217,10 +209,8 @@ setInterval(() => {
   }
 
   timeEl.innerText = format(t);
-
 }, 100);
 
 </script>
-
 </body>
 </html>
