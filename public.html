@@ -135,6 +135,8 @@ onValue(matchRef, snap=>{
       setTimeout(()=>goalOverlay.classList.remove("goal-show"),2000);
     }
     lastEvent=data.lastEvent.timestamp;
+    console.log("DATA FIREBASE:", data);
+    console.log("LAST EVENT:", data?.lastEvent);
   }
 });
 
