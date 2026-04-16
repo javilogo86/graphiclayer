@@ -2,146 +2,204 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Overlay Champions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Árbitro Mobile PRO</title>
 
 <style>
-body { margin:0; background:transparent; font-family:Arial; }
-
-.overlay {
-  position:absolute;
-  top:30px;
-  left:30px;
-  display:flex;
-  align-items:center;
+body {
+  font-family: Arial;
+  background: #0f0f0f;
+  color: white;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
 }
 
-.time-box {
-  background:#f2f2f2;
-  color:#111;
-  padding:6px 18px;
-  font-size:28px;
-  font-weight:bold;
+h1 { font-size: 22px; }
+
+.score {
+  font-size: 60px;
+  margin: 20px 0;
 }
 
-.score-box {
-  display:flex;
-  align-items:center;
-  background:linear-gradient(90deg,#0a0f5c,#1c2ad6);
-  color:white;
-  padding:6px 20px;
-  font-size:28px;
-  gap:20px;
+.time {
+  font-size: 40px;
+  color: #00ffcc;
 }
 
-.team { width:70px; text-align:center; }
-
-.sep { opacity:0.4; }
-
-.red-bar { width:6px; height:100%; background:red; }
-
-.goal-overlay {
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-size:120px;
-  color:white;
-  opacity:0;
-  pointer-events:none;
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
 }
 
-.goal-show {
-  animation:goal 2s;
+button {
+  padding: 20px;
+  font-size: 18px;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
 }
 
-@keyframes goal {
-  0% { opacity:0; transform:scale(0.5); }
-  40% { opacity:1; transform:scale(1.2); }
-  100% { opacity:0; }
+.green { background: #28a745; }
+.red { background: #dc3545; }
+.blue { background: #007bff; }
+.gray { background: #444; }
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 5px 0;
+  border-radius: 6px;
+  border: none;
 }
 </style>
 </head>
 
 <body>
 
-<div class="overlay">
-  <div class="time-box" id="time">00:00</div>
+<h1>👨‍⚖️ Árbitro Mobile PRO</h1>
 
-  <div class="score-box">
-    <div class="team" id="teamA">AAA</div>
-    <div>
-      <span id="scoreA">0</span>
-      <span class="sep">|</span>
-      <span id="scoreB">0</span>
-    </div>
-    <div class="team" id="teamB">BBB</div>
-  </div>
+<input id="teamA" placeholder="Equipo A">
+<input id="teamB" placeholder="Equipo B">
 
-  <div class="red-bar"></div>
+<button class="blue" onclick="setTeams()">Guardar equipos</button>
+
+<div class="score" id="score">0 - 0</div>
+<div class="time" id="time">00:00</div>
+
+<div class="grid">
+  <button class="green" onclick="goalA()">+ A</button>
+  <button class="green" onclick="goalB()">+ B</button>
+
+  <button class="red" onclick="minusA()">- A</button>
+  <button class="red" onclick="minusB()">- B</button>
+
+  <button class="blue" onclick="start()">▶ Start</button>
+  <button class="red" onclick="pause()">⏸ Pause</button>
+
+  <button class="gray" onclick="reset()">Reset</button>
 </div>
-
-<div id="goalOverlay" class="goal-overlay">GOAL</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, onValue } 
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import {
+  getDatabase,
+  ref,
+  update,
+  runTransaction,
+  onValue,
+  get
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const app = initializeApp({
   databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
 });
 
 const db = getDatabase(app);
-const matchRef = ref(db,"match");
+const matchRef = ref(db, "match");
 
-const teamAEl = document.getElementById("teamA");
-const teamBEl = document.getElementById("teamB");
-const scoreAEl = document.getElementById("scoreA");
-const scoreBEl = document.getElementById("scoreB");
+/* ⚽ GOLES */
+window.goalA = async () => {
+  await runTransaction(ref(db,"match/scoreA"), n => (n||0)+1);
+
+  await update(matchRef, {
+    lastEvent: {
+      id: Date.now(),
+      type: "goal",
+      team: "A",
+      timestamp: Date.now()
+    }
+  });
+};
+
+window.goalB = async () => {
+  await runTransaction(ref(db,"match/scoreB"), n => (n||0)+1);
+
+  await update(matchRef, {
+    lastEvent: {
+      id: Date.now(),
+      type: "goal",
+      team: "B",
+      timestamp: Date.now()
+    }
+  });
+};
+
+/* ➖ RESTA */
+window.minusA = () =>
+  runTransaction(ref(db,"match/scoreA"), n => Math.max((n||0)-1,0));
+
+window.minusB = () =>
+  runTransaction(ref(db,"match/scoreB"), n => Math.max((n||0)-1,0));
+
+/* 🏷️ EQUIPOS */
+window.setTeams = () => {
+  update(matchRef, {
+    teamA: document.getElementById("teamA").value,
+    teamB: document.getElementById("teamB").value
+  });
+};
+
+/* ▶ START */
+window.start = () => {
+  update(matchRef, {
+    startTime: Date.now(),
+    isRunning: true
+  });
+};
+
+/* ⏸ PAUSE */
+window.pause = async () => {
+  const snap = await get(matchRef);
+  const d = snap.val();
+
+  if (!d || !d.startTime) return;
+
+  const now = Date.now();
+
+  await update(matchRef, {
+    elapsed: (d.elapsed || 0) + (now - d.startTime),
+    startTime: null,
+    isRunning: false
+  });
+};
+
+/* 🔄 RESET */
+window.reset = () => {
+  update(matchRef, {
+    scoreA: 0,
+    scoreB: 0,
+    elapsed: 0,
+    startTime: null,
+    isRunning: false,
+    lastEvent: null
+  });
+};
+
+/* UI */
+const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
-const goalOverlay = document.getElementById("goalOverlay");
 
 let data = null;
-let lastEventId = null;
 
-/* FORMAT */
 function format(ms){
   const s = Math.floor(ms/1000);
-  return String(Math.floor(s/60)).padStart(2,'0')+":"+String(s%60).padStart(2,'0');
+  return String(Math.floor(s/60)).padStart(2,'0') + ":" +
+         String(s%60).padStart(2,'0');
 }
 
-function short(n){
-  return n?.substring(0,3).toUpperCase() || "---";
-}
-
-/* FIREBASE */
-onValue(matchRef, snap=>{
+onValue(matchRef, snap => {
   data = snap.val();
   if(!data) return;
 
-  teamAEl.innerText = short(data.teamA);
-  teamBEl.innerText = short(data.teamB);
-
-  scoreAEl.innerText = data.scoreA || 0;
-  scoreBEl.innerText = data.scoreB || 0;
-
-  const event = data.lastEvent;
-
-  if(event && event.id !== lastEventId){
-    if(event.type === "goal"){
-      goalOverlay.classList.add("goal-show");
-
-      setTimeout(()=>{
-        goalOverlay.classList.remove("goal-show");
-      }, 2000);
-    }
-
-    lastEventId = event.id;
-  }
+  scoreEl.innerText = `${data.scoreA||0} - ${data.scoreB||0}`;
 });
 
-/* TIMER */
-setInterval(()=>{
+setInterval(() => {
   if(!data) return;
 
   let t = data.elapsed || 0;
@@ -151,8 +209,8 @@ setInterval(()=>{
   }
 
   timeEl.innerText = format(t);
-},100);
-</script>
+}, 100);
 
+</script>
 </body>
 </html>
