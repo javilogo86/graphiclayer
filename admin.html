@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Árbitro Mobile</title>
+<title>Árbitro Mobile PRO</title>
 
 <style>
 body {
@@ -18,21 +18,24 @@ body {
 
 h1 { font-size: 22px; }
 
+/* SCORE */
 .score {
   font-size: 60px;
   margin: 20px 0;
 }
 
+/* TIME */
 .time {
   font-size: 40px;
   color: #00ffcc;
 }
 
-/* BUTTON GRID */
+/* GRID BOTONES */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  margin-top: 20px;
 }
 
 button {
@@ -41,6 +44,7 @@ button {
   border: none;
   border-radius: 12px;
   color: white;
+  cursor: pointer;
 }
 
 .green { background: #28a745; }
@@ -52,18 +56,20 @@ input {
   width: 100%;
   padding: 12px;
   margin: 5px 0;
+  border-radius: 6px;
+  border: none;
 }
 </style>
 </head>
 
 <body>
 
-<h1>👨‍⚖️ Árbitro Mobile</h1>
+<h1>👨‍⚖️ Árbitro Mobile PRO</h1>
 
 <input id="teamA" placeholder="Equipo A">
 <input id="teamB" placeholder="Equipo B">
 
-<button class="blue" onclick="setTeams()">Guardar</button>
+<button class="blue" onclick="setTeams()">Guardar equipos</button>
 
 <div class="score" id="score">0 - 0</div>
 <div class="time" id="time">00:00</div>
@@ -71,11 +77,13 @@ input {
 <div class="grid">
   <button class="green" onclick="goalA()">+ A</button>
   <button class="green" onclick="goalB()">+ B</button>
-  <!-- ➖ NUEVOS BOTONES -->
+
   <button class="red" onclick="minusA()">- A</button>
   <button class="red" onclick="minusB()">- B</button>
+
   <button class="blue" onclick="start()">▶ Start</button>
   <button class="red" onclick="pause()">⏸ Pause</button>
+
   <button class="gray" onclick="reset()">Reset</button>
 </div>
 
@@ -84,6 +92,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebas
 import { getDatabase, ref, update, runTransaction, onValue }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+/* 🔥 FIREBASE CONFIG */
 const app = initializeApp({
   databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
 });
@@ -91,75 +100,119 @@ const app = initializeApp({
 const db = getDatabase(app);
 const matchRef = ref(db, "match");
 
-window.goalA = () => runTransaction(ref(db,"match/scoreA"), n => (n||0)+1);
-window.goalB = () => runTransaction(ref(db,"match/scoreB"), n => (n||0)+1);
+/* ================= FUNCIONES ================= */
 
-window.minusA = () =>
-  runTransaction(ref(db,"match/scoreA"), n => Math.max((n || 0) - 1, 0));
+/* ⚽ GOLES + EVENTO */
+window.goalA = async () => {
+  await runTransaction(ref(db,"match/scoreA"), n => (n||0)+1);
 
-window.minusB = () =>
-  runTransaction(ref(db,"match/scoreB"), n => Math.max((n || 0) - 1, 0));
-
-window.setTeams = () => {
-  update(matchRef, {
-    teamA: teamA.value,
-    teamB: teamB.value
+  update(matchRef,{
+    lastEvent:{
+      type:"goal",
+      team:"A",
+      timestamp:Date.now()
+    }
   });
 };
 
-window.start = () => {
-  update(matchRef, { startTime: Date.now(), isRunning:true });
+window.goalB = async () => {
+  await runTransaction(ref(db,"match/scoreB"), n => (n||0)+1);
+
+  update(matchRef,{
+    lastEvent:{
+      type:"goal",
+      team:"B",
+      timestamp:Date.now()
+    }
+  });
 };
 
+/* ➖ RESTAR */
+window.minusA = () =>
+  runTransaction(ref(db,"match/scoreA"), n => Math.max((n||0)-1,0));
+
+window.minusB = () =>
+  runTransaction(ref(db,"match/scoreB"), n => Math.max((n||0)-1,0));
+
+/* 🏷️ EQUIPOS */
+window.setTeams = () => {
+  update(matchRef, {
+    teamA: document.getElementById("teamA").value,
+    teamB: document.getElementById("teamB").value
+  });
+};
+
+/* ▶ START */
+window.start = () => {
+  update(matchRef, {
+    startTime: Date.now(),
+    isRunning: true
+  });
+};
+
+/* ⏸ PAUSE */
 window.pause = () => {
   runTransaction(matchRef, d => {
+    if(!d || !d.startTime) return d;
+
     const now = Date.now();
+
     return {
       ...d,
-      elapsed: (d.elapsed||0)+(now-d.startTime),
-      startTime:null,
-      isRunning:false
+      elapsed: (d.elapsed || 0) + (now - d.startTime),
+      startTime: null,
+      isRunning: false
     };
   });
 };
 
+/* 🔄 RESET */
 window.reset = () => {
   update(matchRef, {
-    scoreA:0,
-    scoreB:0,
-    elapsed:0,
-    startTime:null,
-    isRunning:false
+    scoreA: 0,
+    scoreB: 0,
+    elapsed: 0,
+    startTime: null,
+    isRunning: false,
+    lastEvent: null
   });
 };
+
+/* ================= UI ================= */
 
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
 
-let data=null;
+let data = null;
 
+/* ⏱️ FORMATO */
 function format(ms){
-  const s=Math.floor(ms/1000);
-  return String(Math.floor(s/60)).padStart(2,'0')+":"+String(s%60).padStart(2,'0');
+  const s = Math.floor(ms/1000);
+  return String(Math.floor(s/60)).padStart(2,'0') + ":" +
+         String(s%60).padStart(2,'0');
 }
 
-onValue(matchRef, snap=>{
-  data=snap.val();
+/* 🔄 FIREBASE LISTENER */
+onValue(matchRef, snap => {
+  data = snap.val();
   if(!data) return;
 
-  scoreEl.innerText=`${data.scoreA||0} - ${data.scoreB||0}`;
+  scoreEl.innerText = `${data.scoreA||0} - ${data.scoreB||0}`;
 });
 
-setInterval(()=>{
+/* ⏱️ CRONÓMETRO FLUIDO */
+setInterval(() => {
   if(!data) return;
 
-  let t=data.elapsed||0;
+  let t = data.elapsed || 0;
+
   if(data.isRunning && data.startTime){
-    t+=Date.now()-data.startTime;
+    t += Date.now() - data.startTime;
   }
 
-  timeEl.innerText=format(t);
-},100);
+  timeEl.innerText = format(t);
+
+}, 100);
 
 </script>
 
