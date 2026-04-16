@@ -18,19 +18,16 @@ body {
 
 h1 { font-size: 22px; }
 
-/* SCORE */
 .score {
   font-size: 60px;
   margin: 20px 0;
 }
 
-/* TIME */
 .time {
   font-size: 40px;
   color: #00ffcc;
 }
 
-/* GRID BOTONES */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -89,8 +86,14 @@ input {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, update, runTransaction, onValue }
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import {
+  getDatabase,
+  ref,
+  update,
+  runTransaction,
+  onValue,
+  get
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 /* 🔥 FIREBASE CONFIG */
 const app = initializeApp({
@@ -100,17 +103,16 @@ const app = initializeApp({
 const db = getDatabase(app);
 const matchRef = ref(db, "match");
 
-/* ================= FUNCIONES ================= */
+/* ================= GOLES ================= */
 
-/* ⚽ GOLES + EVENTO */
 window.goalA = async () => {
   await runTransaction(ref(db,"match/scoreA"), n => (n||0)+1);
 
-  update(matchRef,{
-    lastEvent:{
-      type:"goal",
-      team:"A",
-      timestamp:Date.now()
+  await update(matchRef, {
+    lastEvent: {
+      type: "goal",
+      team: "A",
+      timestamp: Date.now()
     }
   });
 };
@@ -118,23 +120,25 @@ window.goalA = async () => {
 window.goalB = async () => {
   await runTransaction(ref(db,"match/scoreB"), n => (n||0)+1);
 
-  update(matchRef,{
-    lastEvent:{
-      type:"goal",
-      team:"B",
-      timestamp:Date.now()
+  await update(matchRef, {
+    lastEvent: {
+      type: "goal",
+      team: "B",
+      timestamp: Date.now()
     }
   });
 };
 
-/* ➖ RESTAR */
+/* ================= RESTAR ================= */
+
 window.minusA = () =>
   runTransaction(ref(db,"match/scoreA"), n => Math.max((n||0)-1,0));
 
 window.minusB = () =>
   runTransaction(ref(db,"match/scoreB"), n => Math.max((n||0)-1,0));
 
-/* 🏷️ EQUIPOS */
+/* ================= EQUIPOS ================= */
+
 window.setTeams = () => {
   update(matchRef, {
     teamA: document.getElementById("teamA").value,
@@ -142,7 +146,8 @@ window.setTeams = () => {
   });
 };
 
-/* ▶ START */
+/* ================= START ================= */
+
 window.start = () => {
   update(matchRef, {
     startTime: Date.now(),
@@ -150,23 +155,25 @@ window.start = () => {
   });
 };
 
-/* ⏸ PAUSE */
-window.pause = () => {
-  runTransaction(matchRef, d => {
-    if(!d || !d.startTime) return d;
+/* ================= PAUSE (FIX IMPORTANTE) ================= */
 
-    const now = Date.now();
+window.pause = async () => {
+  const snap = await get(matchRef);
+  const d = snap.val();
 
-    return {
-      ...d,
-      elapsed: (d.elapsed || 0) + (now - d.startTime),
-      startTime: null,
-      isRunning: false
-    };
+  if (!d || !d.startTime) return;
+
+  const now = Date.now();
+
+  await update(matchRef, {
+    elapsed: (d.elapsed || 0) + (now - d.startTime),
+    startTime: null,
+    isRunning: false
   });
 };
 
-/* 🔄 RESET */
+/* ================= RESET ================= */
+
 window.reset = () => {
   update(matchRef, {
     scoreA: 0,
@@ -185,14 +192,13 @@ const timeEl = document.getElementById("time");
 
 let data = null;
 
-/* ⏱️ FORMATO */
 function format(ms){
   const s = Math.floor(ms/1000);
   return String(Math.floor(s/60)).padStart(2,'0') + ":" +
          String(s%60).padStart(2,'0');
 }
 
-/* 🔄 FIREBASE LISTENER */
+/* 🔄 LISTENER */
 onValue(matchRef, snap => {
   data = snap.val();
   if(!data) return;
@@ -200,7 +206,7 @@ onValue(matchRef, snap => {
   scoreEl.innerText = `${data.scoreA||0} - ${data.scoreB||0}`;
 });
 
-/* ⏱️ CRONÓMETRO FLUIDO */
+/* ⏱️ TIMER */
 setInterval(() => {
   if(!data) return;
 
