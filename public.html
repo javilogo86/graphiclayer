@@ -11,20 +11,16 @@ body{
   font-family:Arial;
 }
 
+/* OVERLAY */
 .overlay{
   position:absolute;
   top:30px;
   left:30px;
   display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.top-row{
-  display:flex;
   align-items:center;
 }
 
+/* TIME */
 .time-box{
   background:#f2f2f2;
   color:#111;
@@ -33,12 +29,14 @@ body{
   font-weight:bold;
 }
 
+/* SCORE CONTAINER */
 .score-container{
   position:relative;
   height:52px;
   overflow:hidden;
 }
 
+/* SCORE BAR */
 .score-box{
   display:flex;
   align-items:center;
@@ -63,11 +61,13 @@ body{
   transform:scale(1);
 }
 
+/* HIDE SCORE */
 .score-box.hide{
   opacity:0;
   transform:scale(.8);
 }
 
+/* TEAM */
 .team{
   width:70px;
   text-align:center;
@@ -77,6 +77,7 @@ body{
   opacity:.4;
 }
 
+/* PERIOD BOX */
 .period-box{
 
   background:#111;
@@ -93,16 +94,19 @@ body{
   text-align:center;
 }
 
+/* HIDE PERIOD */
 .period-box.hide{
   display:none;
 }
 
+/* RED BAR */
 .red-bar{
   width:6px;
-  height:52px;
+  height:100%;
   background:red;
 }
 
+/* GOAL OVERLAY */
 .goal-overlay{
   position:absolute;
   inset:0;
@@ -133,56 +137,32 @@ body{
   pointer-events:none;
 }
 
+/* SHOW GOAL */
 .goal-overlay.show{
   opacity:1;
   transform:scale(1);
 }
 
-/* PENALTIS */
-.penalties{
-  display:none;
-  background:rgba(0,0,0,.8);
-  padding:12px 20px;
-  border-radius:12px;
-  color:white;
+/* PULSE */
+.goal-overlay.show span{
+  animation:pulse .6s infinite;
 }
 
-.penalties.show{
-  display:block;
-}
+@keyframes pulse{
 
-.penalty-row{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin:8px 0;
-}
+  0%{
+    transform:scale(1);
+  }
 
-.penalty-team{
-  width:80px;
-  font-weight:bold;
-}
+  50%{
+    transform:scale(1.08);
+  }
 
-.penalty-dots{
-  display:flex;
-  gap:8px;
-}
+  100%{
+    transform:scale(1);
+  }
 
-.dot{
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  background:#555;
 }
-
-.dot.goal{
-  background:#00ff66;
-}
-
-.dot.miss{
-  background:#ff2222;
-}
-
 </style>
 </head>
 
@@ -190,12 +170,12 @@ body{
 
 <div class="overlay">
 
-<div class="top-row">
-
+  <!-- TIME -->
   <div class="time-box" id="time">
     00:00
   </div>
 
+  <!-- SCORE -->
   <div class="score-container">
 
     <div class="score-box" id="scoreBox">
@@ -216,44 +196,20 @@ body{
 
     </div>
 
+    <!-- GOAL -->
     <div id="goalOverlay" class="goal-overlay">
       <span>GOOOOOOL</span>
     </div>
 
   </div>
 
+  <!-- PERIODO -->
   <div class="period-box hide" id="periodBox">
     1T
   </div>
 
+  <!-- RED BAR -->
   <div class="red-bar"></div>
-
-</div>
-
-<!-- PENALTIS -->
-<div class="penalties" id="penaltiesBox">
-
-  <div class="penalty-row">
-
-    <div class="penalty-team" id="penTeamA">
-      TEAM A
-    </div>
-
-    <div class="penalty-dots" id="dotsA"></div>
-
-  </div>
-
-  <div class="penalty-row">
-
-    <div class="penalty-team" id="penTeamB">
-      TEAM B
-    </div>
-
-    <div class="penalty-dots" id="dotsB"></div>
-
-  </div>
-
-</div>
 
 </div>
 
@@ -269,6 +225,7 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+/* FIREBASE */
 const app = initializeApp({
   databaseURL:
   "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
@@ -277,6 +234,7 @@ const app = initializeApp({
 const db = getDatabase(app);
 const matchRef = ref(db,"match");
 
+/* ELEMENTOS */
 const teamAEl =
 document.getElementById("teamA");
 
@@ -295,23 +253,16 @@ document.getElementById("time");
 const periodBox =
 document.getElementById("periodBox");
 
-const penaltiesBox =
-document.getElementById("penaltiesBox");
+const scoreBox =
+document.getElementById("scoreBox");
 
-const dotsA =
-document.getElementById("dotsA");
-
-const dotsB =
-document.getElementById("dotsB");
-
-const penTeamA =
-document.getElementById("penTeamA");
-
-const penTeamB =
-document.getElementById("penTeamB");
+const goalOverlay =
+document.getElementById("goalOverlay");
 
 let data = null;
+let lastEventId = null;
 
+/* FORMATO */
 function format(ms){
 
   const s = Math.floor(ms/1000);
@@ -326,6 +277,7 @@ function format(ms){
 
 }
 
+/* 4 LETRAS */
 function short(n){
 
   return n?.substring(0,4)
@@ -335,55 +287,62 @@ function short(n){
 
 }
 
-function renderPenalties(container,arr){
+/* GOAL */
+function showGoalAnimation(){
 
-  container.innerHTML = "";
+  goalOverlay.classList.remove("show");
+  scoreBox.classList.remove("hide");
 
-  arr.forEach(p=>{
+  void goalOverlay.offsetWidth;
 
-    const dot =
-    document.createElement("div");
+  /* 1 */
+  scoreBox.classList.add("hide");
 
-    dot.classList.add("dot");
+  /* 2 */
+  setTimeout(()=>{
 
-    if(p === "goal"){
-      dot.classList.add("goal");
-    }
+    goalOverlay.classList.add("show");
 
-    if(p === "miss"){
-      dot.classList.add("miss");
-    }
+  },400);
 
-    container.appendChild(dot);
+  /* 3 */
+  setTimeout(()=>{
 
-  });
+    goalOverlay.classList.remove("show");
+
+  },2400);
+
+  /* 4 */
+  setTimeout(()=>{
+
+    scoreBox.classList.remove("hide");
+
+  },2800);
 
 }
 
+/* FIREBASE */
 onValue(matchRef, snap=>{
 
   data = snap.val();
 
   if(!data) return;
 
+  /* EQUIPOS */
   teamAEl.innerText =
     short(data.teamA);
 
   teamBEl.innerText =
     short(data.teamB);
 
-  penTeamA.innerText =
-    short(data.teamA);
-
-  penTeamB.innerText =
-    short(data.teamB);
-
+  /* SCORE */
   scoreAEl.innerText =
     data.scoreA || 0;
 
   scoreBEl.innerText =
     data.scoreB || 0;
 
+  /* PERIODO */
   if(data.periodMode === "halves"){
 
     periodBox.classList.remove("hide");
@@ -397,29 +356,23 @@ onValue(matchRef, snap=>{
 
   }
 
-  /* PENALTIS */
-  if(data.penaltiesEnabled){
+  /* EVENTOS */
+  const event = data.lastEvent;
 
-    penaltiesBox.classList.add("show");
+  if(event && event.id !== lastEventId){
 
-    renderPenalties(
-      dotsA,
-      data.penaltiesA || []
-    );
+    if(event.type === "goal"){
 
-    renderPenalties(
-      dotsB,
-      data.penaltiesB || []
-    );
+      showGoalAnimation();
 
-  }else{
+    }
 
-    penaltiesBox.classList.remove("show");
-
+    lastEventId = event.id;
   }
 
 });
 
+/* TIMER */
 setInterval(()=>{
 
   if(!data) return;
