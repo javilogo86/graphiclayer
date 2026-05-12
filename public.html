@@ -5,10 +5,14 @@
 <title>Overlay Champions</title>
 
 <style>
-body { margin:0; background:transparent; font-family:Arial; }
+body{
+  margin:0;
+  background:transparent;
+  font-family:Arial;
+}
 
 /* OVERLAY */
-.overlay {
+.overlay{
   position:absolute;
   top:30px;
   left:30px;
@@ -16,9 +20,8 @@ body { margin:0; background:transparent; font-family:Arial; }
   align-items:center;
 }
 
-
 /* TIME */
-.time-box {
+.time-box{
   background:#f2f2f2;
   color:#111;
   padding:6px 18px;
@@ -26,42 +29,113 @@ body { margin:0; background:transparent; font-family:Arial; }
   font-weight:bold;
 }
 
-/* SCORE BAR */
-.score-box {
-  display:flex;
-  align-items:center;
-  background:linear-gradient(90deg,#0a0f5c,#1c2ad6);
-  color:white;
-  padding:6px 20px;
-  font-size:28px;
-  gap:20px;
+/* CONTENEDOR SCORE */
+.score-container{
+  position:relative;
+  height:52px;
+  overflow:hidden;
 }
 
-.team { width:70px; text-align:center; }
-.sep { opacity:0.4; }
+/* SCORE BAR */
+.score-box{
+  display:flex;
+  align-items:center;
 
-.red-bar { width:6px; height:100%; background:red; }
+  background:linear-gradient(
+    90deg,
+    #0a0f5c,
+    #1c2ad6
+  );
 
-/* GOAL ANIMATION */
-.goal-overlay {
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-size:120px;
   color:white;
+
+  padding:6px 20px;
+
+  font-size:28px;
+
+  gap:20px;
+
+  transition:all .4s ease;
+
+  opacity:1;
+  transform:scale(1);
+}
+
+/* OCULTAR SCORE */
+.score-box.hide{
   opacity:0;
+  transform:scale(.8);
+}
+
+/* TEAM */
+.team{
+  width:70px;
+  text-align:center;
+}
+
+.sep{
+  opacity:.4;
+}
+
+/* RED BAR */
+.red-bar{
+  width:6px;
+  height:100%;
+  background:red;
+}
+
+/* GOAL INSIDE SCORE */
+.goal-overlay{
+  position:absolute;
+  inset:0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:linear-gradient(
+    90deg,
+    #ff7b00,
+    #ff0000
+  );
+
+  color:white;
+
+  font-size:34px;
+  font-weight:bold;
+  letter-spacing:4px;
+
+  opacity:0;
+  transform:scale(1.2);
+
+  transition:all .4s ease;
+
   pointer-events:none;
 }
 
-.goal-show {
-  animation:goal 2s;
+/* SHOW GOAL */
+.goal-overlay.show{
+  opacity:1;
+  transform:scale(1);
 }
 
-@keyframes goal {
-  0% { opacity:0; transform:scale(0.5); }
-  40% { opacity:1; transform:scale(1.2); }
-  100% { opacity:0; }
+/* ANIMATION */
+.goal-overlay.show span{
+  animation:pulse .6s infinite;
+}
+
+@keyframes pulse{
+  0%{
+    transform:scale(1);
+  }
+
+  50%{
+    transform:scale(1.08);
+  }
+
+  100%{
+    transform:scale(1);
+  }
 }
 </style>
 </head>
@@ -69,86 +143,206 @@ body { margin:0; background:transparent; font-family:Arial; }
 <body>
 
 <div class="overlay">
- 
-  <div class="time-box" id="time">00:00</div>
 
-  <div class="score-box">
-    <div class="team" id="teamA">AAAA</div>
-    <div>
-      <span id="scoreA">0</span>
-      <span class="sep">|</span>
-      <span id="scoreB">0</span>
-    </div>
-    <div class="team" id="teamB">BBBB</div>
+  <!-- TIME -->
+  <div class="time-box" id="time">
+    00:00
   </div>
 
+  <!-- SCORE -->
+  <div class="score-container">
+
+    <div class="score-box" id="scoreBox">
+
+      <div class="team" id="teamA">
+        AAAA
+      </div>
+
+      <div>
+        <span id="scoreA">0</span>
+        <span class="sep">|</span>
+        <span id="scoreB">0</span>
+      </div>
+
+      <div class="team" id="teamB">
+        BBBB
+      </div>
+
+    </div>
+
+    <!-- GOAL -->
+    <div id="goalOverlay" class="goal-overlay">
+      <span>GOOOOOOL</span>
+    </div>
+
+  </div>
+
+  <!-- RED BAR -->
   <div class="red-bar"></div>
+
 </div>
 
-<div id="goalOverlay" class="goal-overlay">GOL!</div>
-
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, onValue } 
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+
+import {
+  getDatabase,
+  ref,
+  onValue
+}
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+/* FIREBASE */
 const app = initializeApp({
-  databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
+  databaseURL:
+  "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
 });
 
 const db = getDatabase(app);
 const matchRef = ref(db,"match");
 
-const teamAEl = document.getElementById("teamA");
-const teamBEl = document.getElementById("teamB");
-const scoreAEl = document.getElementById("scoreA");
-const scoreBEl = document.getElementById("scoreB");
-const timeEl = document.getElementById("time");
-const goalOverlay = document.getElementById("goalOverlay");
+/* ELEMENTOS */
+const teamAEl =
+document.getElementById("teamA");
 
-let data=null;
-let lastEvent=null;
+const teamBEl =
+document.getElementById("teamB");
+
+const scoreAEl =
+document.getElementById("scoreA");
+
+const scoreBEl =
+document.getElementById("scoreB");
+
+const timeEl =
+document.getElementById("time");
+
+const scoreBox =
+document.getElementById("scoreBox");
+
+const goalOverlay =
+document.getElementById("goalOverlay");
+
+let data = null;
+let lastEventId = null;
 
 /* FORMATO */
 function format(ms){
-  const s=Math.floor(ms/1000);
-  return String(Math.floor(s/60)).padStart(2,'0')+":"+String(s%60).padStart(2,'0');
+
+  const s = Math.floor(ms/1000);
+
+  return String(Math.floor(s/60))
+    .padStart(2,'0')
+
+    + ":"
+
+    + String(s%60)
+    .padStart(2,'0');
+
 }
 
-function short(n){ return n?.substring(0,4).toUpperCase() || "---"; }
+/* 4 LETRAS */
+function short(n){
+
+  return n?.substring(0,4)
+    .toUpperCase()
+
+    || "----";
+
+}
+
+/* ANIMACIÓN GOAL */
+function showGoalAnimation(){
+
+  /* RESET */
+  goalOverlay.classList.remove("show");
+  scoreBox.classList.remove("hide");
+
+  void goalOverlay.offsetWidth;
+
+  /* 1 - DESAPARECE MARCADOR */
+  scoreBox.classList.add("hide");
+
+  /* 2 - APARECE GOL */
+  setTimeout(()=>{
+
+    goalOverlay.classList.add("show");
+
+  },400);
+
+  /* 3 - DESAPARECE GOL */
+  setTimeout(()=>{
+
+    goalOverlay.classList.remove("show");
+
+  },2400);
+
+  /* 4 - VUELVE MARCADOR */
+  setTimeout(()=>{
+
+    scoreBox.classList.remove("hide");
+
+  },2800);
+
+}
 
 /* FIREBASE */
 onValue(matchRef, snap=>{
-  data=snap.val();
+
+  data = snap.val();
+
   if(!data) return;
 
-  teamAEl.innerText=short(data.teamA);
-  teamBEl.innerText=short(data.teamB);
+  /* EQUIPOS */
+  teamAEl.innerText =
+    short(data.teamA);
 
-  scoreAEl.innerText=data.scoreA||0;
-  scoreBEl.innerText=data.scoreB||0;
+  teamBEl.innerText =
+    short(data.teamB);
 
-  /* ⚽ EVENTO GOAL */
-  if(data.lastEvent && data.lastEvent.timestamp !== lastEvent){
-    if(data.lastEvent.type==="goal"){
-      goalOverlay.classList.add("goal-show");
-      setTimeout(()=>goalOverlay.classList.remove("goal-show"),2000);
+  /* SCORE */
+  scoreAEl.innerText =
+    data.scoreA || 0;
+
+  scoreBEl.innerText =
+    data.scoreB || 0;
+
+  /* EVENTO */
+  const event = data.lastEvent;
+
+  if(event && event.id !== lastEventId){
+
+    if(event.type === "goal"){
+
+      showGoalAnimation();
+
     }
-    lastEvent=data.lastEvent.timestamp;
+
+    lastEventId = event.id;
   }
+
 });
 
 /* TIMER */
 setInterval(()=>{
+
   if(!data) return;
 
-  let t=data.elapsed||0;
+  let t = data.elapsed || 0;
+
   if(data.isRunning && data.startTime){
-    t+=Date.now()-data.startTime;
+
+    t += Date.now()
+      - data.startTime;
+
   }
 
-  timeEl.innerText=format(t);
+  timeEl.innerText = format(t);
+
 },100);
+
 </script>
 
 </body>
