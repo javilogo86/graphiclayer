@@ -28,6 +28,18 @@ h1 { font-size: 22px; }
   color: #00ffcc;
 }
 
+.period-selector{
+  margin:20px 0;
+}
+
+select{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  font-size:18px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -66,26 +78,76 @@ input {
 <input id="teamA" placeholder="Equipo A">
 <input id="teamB" placeholder="Equipo B">
 
-<button class="blue" onclick="setTeams()">Guardar equipos</button>
+<button class="blue" onclick="setTeams()">
+Guardar equipos
+</button>
 
-<div class="score" id="score">0 - 0</div>
-<div class="time" id="time">00:00</div>
+<!-- PERIODOS -->
+<div class="period-selector">
+
+<select id="periodSelect" onchange="setPeriod()">
+
+<option value="single">
+1 Parte
+</option>
+
+<option value="1T">
+1T
+</option>
+
+<option value="2T">
+2T
+</option>
+
+</select>
+
+</div>
+
+<div class="score" id="score">
+0 - 0
+</div>
+
+<div class="time" id="time">
+00:00
+</div>
 
 <div class="grid">
-  <button class="green" onclick="goalA()">+ A</button>
-  <button class="green" onclick="goalB()">+ B</button>
 
-  <button class="red" onclick="minusA()">- A</button>
-  <button class="red" onclick="minusB()">- B</button>
+<button class="green" onclick="goalA()">
++ A
+</button>
 
-  <button class="blue" onclick="start()">▶ Start</button>
-  <button class="red" onclick="pause()">⏸ Pause</button>
+<button class="green" onclick="goalB()">
++ B
+</button>
 
-  <button class="gray" onclick="reset()">Reset</button>
+<button class="red" onclick="minusA()">
+- A
+</button>
+
+<button class="red" onclick="minusB()">
+- B
+</button>
+
+<button class="blue" onclick="start()">
+▶ Start
+</button>
+
+<button class="red" onclick="pause()">
+⏸ Pause
+</button>
+
+<button class="gray" onclick="reset()">
+Reset
+</button>
+
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+
 import {
   getDatabase,
   ref,
@@ -93,18 +155,48 @@ import {
   runTransaction,
   onValue,
   get
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const app = initializeApp({
-  databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
+  databaseURL:
+  "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
 });
 
 const db = getDatabase(app);
 const matchRef = ref(db, "match");
 
-/* ⚽ GOLES */
+/* PERIODOS */
+window.setPeriod = () => {
+
+  const value =
+  document.getElementById("periodSelect").value;
+
+  if(value === "single"){
+
+    update(matchRef,{
+      periodMode:"single",
+      period:null
+    });
+
+  }else{
+
+    update(matchRef,{
+      periodMode:"halves",
+      period:value
+    });
+
+  }
+
+};
+
+/* GOLES */
 window.goalA = async () => {
-  await runTransaction(ref(db,"match/scoreA"), n => (n||0)+1);
+
+  await runTransaction(
+    ref(db,"match/scoreA"),
+    n => (n||0)+1
+  );
 
   await update(matchRef, {
     lastEvent: {
@@ -114,10 +206,15 @@ window.goalA = async () => {
       timestamp: Date.now()
     }
   });
+
 };
 
 window.goalB = async () => {
-  await runTransaction(ref(db,"match/scoreB"), n => (n||0)+1);
+
+  await runTransaction(
+    ref(db,"match/scoreB"),
+    n => (n||0)+1
+  );
 
   await update(matchRef, {
     lastEvent: {
@@ -127,33 +224,50 @@ window.goalB = async () => {
       timestamp: Date.now()
     }
   });
+
 };
 
-/* ➖ RESTA */
+/* RESTA */
 window.minusA = () =>
-  runTransaction(ref(db,"match/scoreA"), n => Math.max((n||0)-1,0));
+  runTransaction(
+    ref(db,"match/scoreA"),
+    n => Math.max((n||0)-1,0)
+  );
 
 window.minusB = () =>
-  runTransaction(ref(db,"match/scoreB"), n => Math.max((n||0)-1,0));
+  runTransaction(
+    ref(db,"match/scoreB"),
+    n => Math.max((n||0)-1,0)
+  );
 
-/* 🏷️ EQUIPOS */
+/* EQUIPOS */
 window.setTeams = () => {
+
   update(matchRef, {
-    teamA: document.getElementById("teamA").value,
-    teamB: document.getElementById("teamB").value
+
+    teamA:
+    document.getElementById("teamA").value,
+
+    teamB:
+    document.getElementById("teamB").value
+
   });
+
 };
 
-/* ▶ START */
+/* START */
 window.start = () => {
+
   update(matchRef, {
     startTime: Date.now(),
     isRunning: true
   });
+
 };
 
-/* ⏸ PAUSE */
+/* PAUSE */
 window.pause = async () => {
+
   const snap = await get(matchRef);
   const d = snap.val();
 
@@ -162,55 +276,86 @@ window.pause = async () => {
   const now = Date.now();
 
   await update(matchRef, {
-    elapsed: (d.elapsed || 0) + (now - d.startTime),
+
+    elapsed:
+    (d.elapsed || 0)
+    + (now - d.startTime),
+
     startTime: null,
     isRunning: false
+
   });
+
 };
 
-/* 🔄 RESET */
+/* RESET */
 window.reset = () => {
+
   update(matchRef, {
+
     scoreA: 0,
     scoreB: 0,
     elapsed: 0,
     startTime: null,
     isRunning: false,
     lastEvent: null
+
   });
+
 };
 
 /* UI */
-const scoreEl = document.getElementById("score");
-const timeEl = document.getElementById("time");
+const scoreEl =
+document.getElementById("score");
+
+const timeEl =
+document.getElementById("time");
 
 let data = null;
 
 function format(ms){
+
   const s = Math.floor(ms/1000);
-  return String(Math.floor(s/60)).padStart(2,'0') + ":" +
-         String(s%60).padStart(2,'0');
+
+  return String(Math.floor(s/60))
+  .padStart(2,'0')
+
+  + ":"
+
+  + String(s%60)
+  .padStart(2,'0');
+
 }
 
 onValue(matchRef, snap => {
+
   data = snap.val();
+
   if(!data) return;
 
-  scoreEl.innerText = `${data.scoreA||0} - ${data.scoreB||0}`;
+  scoreEl.innerText =
+  `${data.scoreA||0} - ${data.scoreB||0}`;
+
 });
 
 setInterval(() => {
+
   if(!data) return;
 
   let t = data.elapsed || 0;
 
   if(data.isRunning && data.startTime){
-    t += Date.now() - data.startTime;
+
+    t += Date.now()
+    - data.startTime;
+
   }
 
   timeEl.innerText = format(t);
+
 }, 100);
 
 </script>
+
 </body>
 </html>
