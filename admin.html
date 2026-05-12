@@ -16,7 +16,9 @@ body {
   padding: 20px;
 }
 
-h1 { font-size: 22px; }
+h1 {
+  font-size: 22px;
+}
 
 .score {
   font-size: 60px;
@@ -56,10 +58,21 @@ button {
   cursor: pointer;
 }
 
-.green { background: #28a745; }
-.red { background: #dc3545; }
-.blue { background: #007bff; }
-.gray { background: #444; }
+.green {
+  background: #28a745;
+}
+
+.red {
+  background: #dc3545;
+}
+
+.blue {
+  background: #007bff;
+}
+
+.gray {
+  background: #444;
+}
 
 input {
   width: 100%;
@@ -139,6 +152,10 @@ Guardar equipos
 
 <button class="gray" onclick="reset()">
 Reset
+</button>
+
+<button class="gray" onclick="resetTime()">
+Reset Time
 </button>
 
 </div>
@@ -288,7 +305,7 @@ window.pause = async () => {
 
 };
 
-/* RESET */
+/* RESET TOTAL */
 window.reset = () => {
 
   update(matchRef, {
@@ -299,6 +316,19 @@ window.reset = () => {
     startTime: null,
     isRunning: false,
     lastEvent: null
+
+  });
+
+};
+
+/* RESET SOLO TIEMPO */
+window.resetTime = () => {
+
+  update(matchRef, {
+
+    elapsed: 0,
+    startTime: null,
+    isRunning: false
 
   });
 
