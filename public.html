@@ -11,6 +11,7 @@ body{
   font-family:Arial;
 }
 
+/* OVERLAY */
 .overlay{
   position:absolute;
   top:30px;
@@ -19,6 +20,7 @@ body{
   align-items:center;
 }
 
+/* TIME */
 .time-box{
   background:#f2f2f2;
   color:#111;
@@ -27,34 +29,14 @@ body{
   font-weight:bold;
 }
 
-/* NUEVO PERIODO */
-.period-box{
-
-  background:#111;
-
-  color:white;
-
-  padding:6px 12px;
-
-  font-size:22px;
-  font-weight:bold;
-
-  margin-left:4px;
-
-  min-width:42px;
-  text-align:center;
-}
-
-.period-box.hide{
-  display:none;
-}
-
+/* SCORE CONTAINER */
 .score-container{
   position:relative;
   height:52px;
   overflow:hidden;
 }
 
+/* SCORE BAR */
 .score-box{
   display:flex;
   align-items:center;
@@ -79,11 +61,13 @@ body{
   transform:scale(1);
 }
 
+/* HIDE SCORE */
 .score-box.hide{
   opacity:0;
   transform:scale(.8);
 }
 
+/* TEAM */
 .team{
   width:70px;
   text-align:center;
@@ -93,12 +77,36 @@ body{
   opacity:.4;
 }
 
+/* PERIOD BOX */
+.period-box{
+
+  background:#111;
+
+  color:white;
+
+  padding:6px 14px;
+
+  font-size:22px;
+  font-weight:bold;
+
+  min-width:50px;
+
+  text-align:center;
+}
+
+/* HIDE PERIOD */
+.period-box.hide{
+  display:none;
+}
+
+/* RED BAR */
 .red-bar{
   width:6px;
   height:100%;
   background:red;
 }
 
+/* GOAL OVERLAY */
 .goal-overlay{
   position:absolute;
   inset:0;
@@ -117,9 +125,11 @@ body{
 
   font-size:34px;
   font-weight:bold;
+
   letter-spacing:4px;
 
   opacity:0;
+
   transform:scale(1.2);
 
   transition:all .4s ease;
@@ -127,11 +137,13 @@ body{
   pointer-events:none;
 }
 
+/* SHOW GOAL */
 .goal-overlay.show{
   opacity:1;
   transform:scale(1);
 }
 
+/* PULSE */
 .goal-overlay.show span{
   animation:pulse .6s infinite;
 }
@@ -163,11 +175,6 @@ body{
     00:00
   </div>
 
-  <!-- PERIODO -->
-  <div class="period-box hide" id="periodBox">
-    1T
-  </div>
-
   <!-- SCORE -->
   <div class="score-container">
 
@@ -189,12 +196,19 @@ body{
 
     </div>
 
+    <!-- GOAL -->
     <div id="goalOverlay" class="goal-overlay">
       <span>GOOOOOOL</span>
     </div>
 
   </div>
 
+  <!-- PERIODO -->
+  <div class="period-box hide" id="periodBox">
+    1T
+  </div>
+
+  <!-- RED BAR -->
   <div class="red-bar"></div>
 
 </div>
@@ -211,6 +225,7 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+/* FIREBASE */
 const app = initializeApp({
   databaseURL:
   "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
@@ -253,21 +268,22 @@ function format(ms){
   const s = Math.floor(ms/1000);
 
   return String(Math.floor(s/60))
-  .padStart(2,'0')
+    .padStart(2,'0')
 
-  + ":"
+    + ":"
 
-  + String(s%60)
-  .padStart(2,'0');
+    + String(s%60)
+    .padStart(2,'0');
 
 }
 
+/* 4 LETRAS */
 function short(n){
 
   return n?.substring(0,4)
-  .toUpperCase()
+    .toUpperCase()
 
-  || "----";
+    || "----";
 
 }
 
@@ -279,20 +295,24 @@ function showGoalAnimation(){
 
   void goalOverlay.offsetWidth;
 
+  /* 1 */
   scoreBox.classList.add("hide");
 
+  /* 2 */
   setTimeout(()=>{
 
     goalOverlay.classList.add("show");
 
   },400);
 
+  /* 3 */
   setTimeout(()=>{
 
     goalOverlay.classList.remove("show");
 
   },2400);
 
+  /* 4 */
   setTimeout(()=>{
 
     scoreBox.classList.remove("hide");
@@ -310,17 +330,17 @@ onValue(matchRef, snap=>{
 
   /* EQUIPOS */
   teamAEl.innerText =
-  short(data.teamA);
+    short(data.teamA);
 
   teamBEl.innerText =
-  short(data.teamB);
+    short(data.teamB);
 
   /* SCORE */
   scoreAEl.innerText =
-  data.scoreA || 0;
+    data.scoreA || 0;
 
   scoreBEl.innerText =
-  data.scoreB || 0;
+    data.scoreB || 0;
 
   /* PERIODO */
   if(data.periodMode === "halves"){
@@ -328,7 +348,7 @@ onValue(matchRef, snap=>{
     periodBox.classList.remove("hide");
 
     periodBox.innerText =
-    data.period || "1T";
+      data.period || "1T";
 
   }else{
 
@@ -362,7 +382,7 @@ setInterval(()=>{
   if(data.isRunning && data.startTime){
 
     t += Date.now()
-    - data.startTime;
+      - data.startTime;
 
   }
 
