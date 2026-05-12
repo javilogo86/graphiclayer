@@ -5,22 +5,29 @@
 <title>Overlay Champions</title>
 
 <style>
+html,
 body{
   margin:0;
+  padding:0;
   background:transparent;
+  overflow:hidden;
   font-family:Arial;
 }
 
-/* OVERLAY */
 .overlay{
   position:absolute;
   top:30px;
   left:30px;
   display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.top-row{
+  display:flex;
   align-items:center;
 }
 
-/* TIME */
 .time-box{
   background:#f2f2f2;
   color:#111;
@@ -29,45 +36,30 @@ body{
   font-weight:bold;
 }
 
-/* SCORE CONTAINER */
 .score-container{
   position:relative;
   height:52px;
   overflow:hidden;
 }
 
-/* SCORE BAR */
 .score-box{
   display:flex;
   align-items:center;
-
-  background:linear-gradient(
-    90deg,
-    #0a0f5c,
-    #1c2ad6
-  );
-
+  background:linear-gradient(90deg,#0a0f5c,#1c2ad6);
   color:white;
-
   padding:6px 20px;
-
   font-size:28px;
-
   gap:20px;
-
   transition:all .4s ease;
-
   opacity:1;
   transform:scale(1);
 }
 
-/* HIDE SCORE */
 .score-box.hide{
   opacity:0;
   transform:scale(.8);
 }
 
-/* TEAM */
 .team{
   width:70px;
   text-align:center;
@@ -77,92 +69,106 @@ body{
   opacity:.4;
 }
 
-/* PERIOD BOX */
 .period-box{
-
   background:#111;
-
   color:white;
-
   padding:6px 14px;
-
   font-size:22px;
   font-weight:bold;
-
   min-width:50px;
-
   text-align:center;
 }
 
-/* HIDE PERIOD */
 .period-box.hide{
   display:none;
 }
 
-/* RED BAR */
 .red-bar{
   width:6px;
-  height:100%;
+  height:52px;
   background:red;
 }
 
-/* GOAL OVERLAY */
+/* ===== GOAL FIX ===== */
 .goal-overlay{
   position:absolute;
   inset:0;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
-  background:linear-gradient(
-    90deg,
-    #ff7b00,
-    #ff0000
-  );
-
+  background:linear-gradient(90deg,#ff7b00,#ff0000);
   color:white;
-
   font-size:34px;
   font-weight:bold;
-
   letter-spacing:4px;
 
   opacity:0;
-
   transform:scale(1.2);
-
-  transition:all .4s ease;
-
   pointer-events:none;
 }
 
-/* SHOW GOAL */
+/* clase base de activación */
 .goal-overlay.show{
   opacity:1;
   transform:scale(1);
+  animation:goalIn .4s ease forwards;
 }
 
-/* PULSE */
-.goal-overlay.show span{
-  animation:pulse .6s infinite;
+/* reinicio seguro */
+.goal-overlay.reset{
+  animation:none;
+  opacity:0;
+  transform:scale(1.2);
 }
 
-@keyframes pulse{
-
-  0%{
-    transform:scale(1);
-  }
-
-  50%{
-    transform:scale(1.08);
-  }
-
-  100%{
-    transform:scale(1);
-  }
-
+@keyframes goalIn{
+  0%{opacity:0; transform:scale(1.3);}
+  100%{opacity:1; transform:scale(1);}
 }
+
+/* PENALTIS */
+.penalties{
+  display:none;
+  background:transparent;
+  padding:0;
+  color:white;
+}
+
+.penalties.show{
+  display:block;
+}
+
+.penalty-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:8px 0;
+}
+
+.penalty-team{
+  width:80px;
+  font-weight:bold;
+  color:white;
+  text-shadow:0 0 4px black,0 0 8px black;
+}
+
+.penalty-dots{
+  display:flex;
+  gap:8px;
+}
+
+.dot{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  border:2px solid white;
+  background:#555;
+  box-shadow:0 0 4px rgba(0,0,0,.8);
+}
+
+.dot.goal{ background:#00ff66; }
+.dot.miss{ background:#ff2222; }
+
 </style>
 </head>
 
@@ -170,19 +176,15 @@ body{
 
 <div class="overlay">
 
-  <!-- TIME -->
-  <div class="time-box" id="time">
-    00:00
-  </div>
+<div class="top-row">
 
-  <!-- SCORE -->
+  <div class="time-box" id="time">00:00</div>
+
   <div class="score-container">
 
     <div class="score-box" id="scoreBox">
 
-      <div class="team" id="teamA">
-        AAAA
-      </div>
+      <div class="team" id="teamA">AAAA</div>
 
       <div>
         <span id="scoreA">0</span>
@@ -190,184 +192,147 @@ body{
         <span id="scoreB">0</span>
       </div>
 
-      <div class="team" id="teamB">
-        BBBB
-      </div>
+      <div class="team" id="teamB">BBBB</div>
 
     </div>
 
-    <!-- GOAL -->
     <div id="goalOverlay" class="goal-overlay">
       <span>GOOOOOOL</span>
     </div>
 
   </div>
 
-  <!-- PERIODO -->
-  <div class="period-box hide" id="periodBox">
-    1T
+  <div class="period-box hide" id="periodBox">1T</div>
+
+  <div class="red-bar"></div>
+
+</div>
+
+<!-- PENALTIS -->
+<div class="penalties" id="penaltiesBox">
+
+  <div class="penalty-row">
+    <div class="penalty-team" id="penTeamA">TEAM A</div>
+    <div class="penalty-dots" id="dotsA"></div>
   </div>
 
-  <!-- RED BAR -->
-  <div class="red-bar"></div>
+  <div class="penalty-row">
+    <div class="penalty-team" id="penTeamB">TEAM B</div>
+    <div class="penalty-dots" id="dotsB"></div>
+  </div>
+
+</div>
 
 </div>
 
 <script type="module">
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-import {
-  getDatabase,
-  ref,
-  onValue
-}
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-
-/* FIREBASE */
 const app = initializeApp({
-  databaseURL:
-  "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
+  databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
 });
 
 const db = getDatabase(app);
 const matchRef = ref(db,"match");
 
 /* ELEMENTOS */
-const teamAEl =
-document.getElementById("teamA");
+const teamAEl = document.getElementById("teamA");
+const teamBEl = document.getElementById("teamB");
+const scoreAEl = document.getElementById("scoreA");
+const scoreBEl = document.getElementById("scoreB");
+const timeEl = document.getElementById("time");
+const periodBox = document.getElementById("periodBox");
+const penaltiesBox = document.getElementById("penaltiesBox");
+const dotsA = document.getElementById("dotsA");
+const dotsB = document.getElementById("dotsB");
+const penTeamA = document.getElementById("penTeamA");
+const penTeamB = document.getElementById("penTeamB");
 
-const teamBEl =
-document.getElementById("teamB");
-
-const scoreAEl =
-document.getElementById("scoreA");
-
-const scoreBEl =
-document.getElementById("scoreB");
-
-const timeEl =
-document.getElementById("time");
-
-const periodBox =
-document.getElementById("periodBox");
-
-const scoreBox =
-document.getElementById("scoreBox");
-
-const goalOverlay =
-document.getElementById("goalOverlay");
+const goalOverlay = document.getElementById("goalOverlay");
 
 let data = null;
 let lastEventId = null;
 
 /* FORMATO */
 function format(ms){
-
   const s = Math.floor(ms/1000);
-
-  return String(Math.floor(s/60))
-    .padStart(2,'0')
-
-    + ":"
-
-    + String(s%60)
-    .padStart(2,'0');
-
+  return String(Math.floor(s/60)).padStart(2,'0') + ":" + String(s%60).padStart(2,'0');
 }
 
-/* 4 LETRAS */
 function short(n){
-
-  return n?.substring(0,4)
-    .toUpperCase()
-
-    || "----";
-
+  return n?.substring(0,4).toUpperCase() || "----";
 }
 
-/* GOAL */
-function showGoalAnimation(){
+/* 🔥 ANIMACIÓN GOAL FIX */
+function showGoal(){
 
+  // reset total
   goalOverlay.classList.remove("show");
-  scoreBox.classList.remove("hide");
 
+  // fuerza reflow para reiniciar animación
   void goalOverlay.offsetWidth;
 
-  /* 1 */
-  scoreBox.classList.add("hide");
+  goalOverlay.classList.add("show");
 
-  /* 2 */
   setTimeout(()=>{
-
-    goalOverlay.classList.add("show");
-
-  },400);
-
-  /* 3 */
-  setTimeout(()=>{
-
     goalOverlay.classList.remove("show");
+  },1800);
+}
 
-  },2400);
+/* PENALTIS */
+function renderPenalties(container,arr){
+  container.innerHTML = "";
 
-  /* 4 */
-  setTimeout(()=>{
+  arr.forEach(p=>{
+    const dot = document.createElement("div");
+    dot.classList.add("dot");
 
-    scoreBox.classList.remove("hide");
+    if(p==="goal") dot.classList.add("goal");
+    if(p==="miss") dot.classList.add("miss");
 
-  },2800);
-
+    container.appendChild(dot);
+  });
 }
 
 /* FIREBASE */
 onValue(matchRef, snap=>{
 
   data = snap.val();
-
   if(!data) return;
 
-  /* EQUIPOS */
-  teamAEl.innerText =
-    short(data.teamA);
+  teamAEl.innerText = short(data.teamA);
+  teamBEl.innerText = short(data.teamB);
 
-  teamBEl.innerText =
-    short(data.teamB);
+  penTeamA.innerText = short(data.teamA);
+  penTeamB.innerText = short(data.teamB);
 
-  /* SCORE */
-  scoreAEl.innerText =
-    data.scoreA || 0;
+  scoreAEl.innerText = data.scoreA || 0;
+  scoreBEl.innerText = data.scoreB || 0;
 
-  scoreBEl.innerText =
-    data.scoreB || 0;
-
-  /* PERIODO */
-  if(data.periodMode === "halves"){
-
-    periodBox.classList.remove("hide");
-
-    periodBox.innerText =
-      data.period || "1T";
-
-  }else{
-
-    periodBox.classList.add("hide");
-
-  }
-
-  /* EVENTOS */
+  /* EVENTO GOAL */
   const event = data.lastEvent;
 
   if(event && event.id !== lastEventId){
 
     if(event.type === "goal"){
-
-      showGoalAnimation();
-
+      showGoal();
     }
 
     lastEventId = event.id;
+  }
+
+  /* PENALTIS */
+  if(data.penaltiesEnabled){
+
+    penaltiesBox.classList.add("show");
+
+    renderPenalties(dotsA, data.penaltiesA || []);
+    renderPenalties(dotsB, data.penaltiesB || []);
+
+  } else {
+    penaltiesBox.classList.remove("show");
   }
 
 });
@@ -380,10 +345,7 @@ setInterval(()=>{
   let t = data.elapsed || 0;
 
   if(data.isRunning && data.startTime){
-
-    t += Date.now()
-      - data.startTime;
-
+    t += Date.now() - data.startTime;
   }
 
   timeEl.innerText = format(t);
