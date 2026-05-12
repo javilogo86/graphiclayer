@@ -74,12 +74,27 @@ button {
   background: #444;
 }
 
+.orange{
+  background:#ff8800;
+}
+
 input {
   width: 100%;
   padding: 12px;
   margin: 5px 0;
   border-radius: 6px;
   border: none;
+}
+
+.penalty-box{
+  margin-top:30px;
+  border:2px solid #333;
+  border-radius:16px;
+  padding:20px;
+}
+
+h2{
+  margin-top:0;
 }
 </style>
 </head>
@@ -160,6 +175,41 @@ Reset Time
 
 </div>
 
+<!-- PENALTIS -->
+<div class="penalty-box">
+
+<h2>⚽ Tanda de Penaltis</h2>
+
+<div class="grid">
+
+<button class="orange" onclick="togglePenalties()">
+Mostrar / Ocultar
+</button>
+
+<button class="gray" onclick="resetPenalties()">
+Reset Penaltis
+</button>
+
+<button class="green" onclick="penaltyGoalA()">
+Gol A
+</button>
+
+<button class="red" onclick="penaltyMissA()">
+Fallo A
+</button>
+
+<button class="green" onclick="penaltyGoalB()">
+Gol B
+</button>
+
+<button class="red" onclick="penaltyMissB()">
+Fallo B
+</button>
+
+</div>
+
+</div>
+
 <script type="module">
 
 import { initializeApp }
@@ -215,15 +265,6 @@ window.goalA = async () => {
     n => (n||0)+1
   );
 
-  await update(matchRef, {
-    lastEvent: {
-      id: Date.now(),
-      type: "goal",
-      team: "A",
-      timestamp: Date.now()
-    }
-  });
-
 };
 
 window.goalB = async () => {
@@ -232,15 +273,6 @@ window.goalB = async () => {
     ref(db,"match/scoreB"),
     n => (n||0)+1
   );
-
-  await update(matchRef, {
-    lastEvent: {
-      id: Date.now(),
-      type: "goal",
-      team: "B",
-      timestamp: Date.now()
-    }
-  });
 
 };
 
@@ -315,7 +347,11 @@ window.reset = () => {
     elapsed: 0,
     startTime: null,
     isRunning: false,
-    lastEvent: null
+    lastEvent: null,
+
+    penaltiesEnabled:false,
+    penaltiesA:[],
+    penaltiesB:[]
 
   });
 
@@ -330,6 +366,96 @@ window.resetTime = () => {
     startTime: null,
     isRunning: false
 
+  });
+
+};
+
+/* PENALTIS */
+window.togglePenalties = async () => {
+
+  const snap = await get(matchRef);
+  const d = snap.val();
+
+  update(matchRef,{
+    penaltiesEnabled: !d?.penaltiesEnabled
+  });
+
+};
+
+window.resetPenalties = () => {
+
+  update(matchRef,{
+    penaltiesEnabled:false,
+    penaltiesA:[],
+    penaltiesB:[]
+  });
+
+};
+
+window.penaltyGoalA = async () => {
+
+  const snap = await get(matchRef);
+
+  const d = snap.val();
+
+  const arr = d?.penaltiesA || [];
+
+  arr.push("goal");
+
+  update(matchRef,{
+    penaltiesEnabled:true,
+    penaltiesA:arr
+  });
+
+};
+
+window.penaltyMissA = async () => {
+
+  const snap = await get(matchRef);
+
+  const d = snap.val();
+
+  const arr = d?.penaltiesA || [];
+
+  arr.push("miss");
+
+  update(matchRef,{
+    penaltiesEnabled:true,
+    penaltiesA:arr
+  });
+
+};
+
+window.penaltyGoalB = async () => {
+
+  const snap = await get(matchRef);
+
+  const d = snap.val();
+
+  const arr = d?.penaltiesB || [];
+
+  arr.push("goal");
+
+  update(matchRef,{
+    penaltiesEnabled:true,
+    penaltiesB:arr
+  });
+
+};
+
+window.penaltyMissB = async () => {
+
+  const snap = await get(matchRef);
+
+  const d = snap.val();
+
+  const arr = d?.penaltiesB || [];
+
+  arr.push("miss");
+
+  update(matchRef,{
+    penaltiesEnabled:true,
+    penaltiesB:arr
   });
 
 };
