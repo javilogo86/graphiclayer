@@ -7,6 +7,7 @@
 <title>Árbitro Mobile PRO</title>
 
 <style>
+
 body{
   font-family:Arial;
   background:#0f0f0f;
@@ -40,6 +41,8 @@ select{
   border:none;
   border-radius:10px;
   font-size:18px;
+  box-sizing:border-box;
+  margin-top:6px;
 }
 
 .grid{
@@ -99,44 +102,31 @@ input{
   margin:0;
 }
 
-.roster-box{
-  display:none;
+.goal-player-box{
   margin-top:25px;
+  background:#151515;
   border:2px solid #333;
   border-radius:16px;
   padding:20px;
-  text-align:left;
-  background:#151515;
 }
 
-.roster-title{
-  text-align:center;
-  font-size:24px;
+.goal-player-title{
+  font-size:22px;
   margin-bottom:20px;
   color:#00ffcc;
 }
 
-.roster-section{
-  margin-bottom:20px;
+.player-select-row{
+  margin-bottom:16px;
+  text-align:left;
 }
 
-.roster-section h3{
-  margin-bottom:10px;
-  color:#ffaa00;
-}
-
-.player{
-  padding:8px 0;
-  border-bottom:1px solid #2c2c2c;
+.player-select-row label{
+  display:block;
+  margin-bottom:8px;
   font-size:16px;
 }
 
-.staff{
-  padding:8px 0;
-  border-bottom:1px solid #2c2c2c;
-  font-size:15px;
-  color:#cccccc;
-}
 </style>
 </head>
 
@@ -147,103 +137,201 @@ input{
 <input id="teamA" placeholder="Equipo A">
 <input id="teamB" placeholder="Equipo B">
 
-<button class="blue" onclick="setTeams()">Guardar equipos</button>
+<button class="blue" onclick="setTeams()">
+Guardar equipos
+</button>
 
 <div class="period-selector">
+
 <select id="periodSelect" onchange="setPeriod()">
 <option value="single">1 Parte</option>
 <option value="1T">1T</option>
 <option value="2T">2T</option>
 </select>
+
 </div>
 
-<div class="score" id="score">0 - 0</div>
-<div class="time" id="time">00:00</div>
+<div class="score" id="score">
+0 - 0
+</div>
+
+<div class="time" id="time">
+00:00
+</div>
+
+<!-- GOLEADORES -->
+<div class="goal-player-box">
+
+<div class="goal-player-title">
+⚽ Selección de goleadores
+</div>
+
+<div class="player-select-row">
+
+<label>
+Jugador Equipo A
+</label>
+
+<select id="playerASelect">
+
+<option value="">
+Seleccionar jugador
+</option>
+
+<option value="Gerard Castillejo|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+Gerard Castillejo
+</option>
+
+<option value="Biel López|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+Biel López
+</option>
+
+<option value="Jared García|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+Jared García
+</option>
+
+<option value="Thiago Oliva|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+Thiago Oliva
+</option>
+
+<option value="Álvaro Pérez|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+Álvaro Pérez
+</option>
+
+</select>
+
+</div>
+
+<div class="player-select-row">
+
+<label>
+Jugador Equipo B
+</label>
+
+<select id="playerBSelect">
+
+<option value="">
+Seleccionar jugador
+</option>
+
+<option value="Eros Forzinetti|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+Eros Forzinetti
+</option>
+
+<option value="Xavi Alguersuari|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+Xavi Alguersuari
+</option>
+
+<option value="Felipe|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+Felipe
+</option>
+
+</select>
+
+</div>
+
+</div>
 
 <div class="grid">
 
-<button class="green" onclick="goalA()">+ A</button>
-<button class="green" onclick="goalB()">+ B</button>
+<button class="green" onclick="goalA()">
++ A
+</button>
 
-<button class="red" onclick="minusA()">- A</button>
-<button class="red" onclick="minusB()">- B</button>
+<button class="green" onclick="goalB()">
++ B
+</button>
 
-<button class="blue" onclick="start()">▶ Start</button>
-<button class="red" onclick="pause()">⏸ Pause</button>
+<button class="red" onclick="minusA()">
+- A
+</button>
 
-<button class="gray" onclick="reset()">Reset</button>
-<button class="gray" onclick="resetTime()">Reset Time</button>
+<button class="red" onclick="minusB()">
+- B
+</button>
 
-</div>
+<button class="blue" onclick="start()">
+▶ Start
+</button>
 
-<!-- CHECK MOSTRAR PLANTILLA -->
-<div class="checkbox-container">
-<input type="checkbox" id="showRoster" onchange="toggleRoster()">
-<label for="showRoster">📋 Mostrar Plantilla</label>
-</div>
+<button class="red" onclick="pause()">
+⏸ Pause
+</button>
 
-<!-- PLANTILLA -->
-<div class="roster-box" id="rosterBox">
+<button class="gray" onclick="reset()">
+Reset
+</button>
 
-<div class="roster-title">
-RCD Espanyol Benjamín S10
-</div>
+<button class="gray" onclick="resetTime()">
+Reset Time
+</button>
 
-<div class="roster-section">
-<h3>🧤 Porteros</h3>
-
-<div class="player">Gerard Castillejo</div>
-<div class="player">Biel López</div>
-</div>
-
-<div class="roster-section">
-<h3>🛡️ Defensas</h3>
-
-<div class="player">Jared García</div>
-<div class="player">Thiago Oliva</div>
-<div class="player">Álvaro Pérez</div>
-<div class="player">Jaume Delgado</div>
-<div class="player">Hugo López</div>
-</div>
-
-<div class="roster-section">
-<h3>🎯 Centrocampistas</h3>
-
-<div class="player">Modric Márquez</div>
-<div class="player">Sergio R.</div>
-<div class="player">Felipe</div>
-</div>
-
-<div class="roster-section">
-<h3>⚡ Delanteros</h3>
-
-<div class="player">Eros Forzinetti</div>
-<div class="player">Xavi Alguersuari</div>
-</div>
-
-</div>
-
-<!-- CHECK HABILITAR PENALTIS -->
-<div class="checkbox-container">
-<input type="checkbox" id="enablePenalties" onchange="togglePenaltyControls()">
-<label for="enablePenalties">⚽ Habilitar Penaltis</label>
 </div>
 
 <!-- PENALTIS -->
+<div class="checkbox-container">
+
+<input
+  type="checkbox"
+  id="enablePenalties"
+  onchange="togglePenaltyControls()"
+>
+
+<label for="enablePenalties">
+⚽ Habilitar Penaltis
+</label>
+
+</div>
+
 <div class="penalty-box" id="penaltyBox">
 
-<h2>⚽ Tanda de Penaltis</h2>
+<h2>
+⚽ Tanda de Penaltis
+</h2>
 
 <div class="grid">
 
-<button class="gray" onclick="resetPenalties()">Reset Penaltis</button>
-<button class="orange" onclick="hidePenalties()">Ocultar Penaltis</button>
+<button
+  class="gray"
+  onclick="resetPenalties()"
+>
+Reset Penaltis
+</button>
 
-<button class="green" onclick="penaltyGoalA()">Gol A</button>
-<button class="red" onclick="penaltyMissA()">Fallo A</button>
+<button
+  class="orange"
+  onclick="hidePenalties()"
+>
+Ocultar Penaltis
+</button>
 
-<button class="green" onclick="penaltyGoalB()">Gol B</button>
-<button class="red" onclick="penaltyMissB()">Fallo B</button>
+<button
+  class="green"
+  onclick="penaltyGoalA()"
+>
+Gol A
+</button>
+
+<button
+  class="red"
+  onclick="penaltyMissA()"
+>
+Fallo A
+</button>
+
+<button
+  class="green"
+  onclick="penaltyGoalB()"
+>
+Gol B
+</button>
+
+<button
+  class="red"
+  onclick="penaltyMissB()"
+>
+Fallo B
+</button>
 
 </div>
 
@@ -251,7 +339,8 @@ RCD Espanyol Benjamín S10
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 
 import {
   getDatabase,
@@ -260,26 +349,32 @@ import {
   runTransaction,
   onValue,
   get
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const app = initializeApp({
-  databaseURL:"https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
+  databaseURL:
+  "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
 });
 
 const db = getDatabase(app);
+
 const matchRef = ref(db,"match");
 
-/* EVENTOS */
+/* EVENTO */
 function newEvent(){
 
-  return Date.now() + "-" + Math.random().toString(16).slice(2);
+  return Date.now()
+    + "-"
+    + Math.random().toString(16).slice(2);
 
 }
 
-/* PERIODOS */
+/* PERIODO */
 window.setPeriod = () => {
 
-  const value = document.getElementById("periodSelect").value;
+  const value =
+    document.getElementById("periodSelect").value;
 
   if(value === "single"){
 
@@ -299,8 +394,24 @@ window.setPeriod = () => {
 
 };
 
-/* GOLES */
+/* GOL A */
 window.goalA = async () => {
+
+  const selected =
+    document.getElementById("playerASelect").value;
+
+  let playerData = null;
+
+  if(selected){
+
+    const parts = selected.split("|");
+
+    playerData = {
+      name:parts[0],
+      photo:parts[1]
+    };
+
+  }
 
   await runTransaction(
     ref(db,"match/scoreA"),
@@ -311,13 +422,31 @@ window.goalA = async () => {
     lastEvent:{
       id:newEvent(),
       type:"goal",
-      team:"A"
+      team:"A",
+      player:playerData
     }
   });
 
 };
 
+/* GOL B */
 window.goalB = async () => {
+
+  const selected =
+    document.getElementById("playerBSelect").value;
+
+  let playerData = null;
+
+  if(selected){
+
+    const parts = selected.split("|");
+
+    playerData = {
+      name:parts[0],
+      photo:parts[1]
+    };
+
+  }
 
   await runTransaction(
     ref(db,"match/scoreB"),
@@ -328,7 +457,8 @@ window.goalB = async () => {
     lastEvent:{
       id:newEvent(),
       type:"goal",
-      team:"B"
+      team:"B",
+      player:playerData
     }
   });
 
@@ -351,13 +481,16 @@ window.minusB = () =>
 window.setTeams = () => {
 
   update(matchRef,{
-    teamA:document.getElementById("teamA").value,
-    teamB:document.getElementById("teamB").value
+    teamA:
+      document.getElementById("teamA").value,
+
+    teamB:
+      document.getElementById("teamB").value
   });
 
 };
 
-/* TIMER */
+/* START */
 window.start = () => {
 
   update(matchRef,{
@@ -367,21 +500,30 @@ window.start = () => {
 
 };
 
+/* PAUSE */
 window.pause = async () => {
 
-  const snap = await get(matchRef);
-  const d = snap.val();
+  const snap =
+    await get(matchRef);
 
-  const now = Date.now();
+  const d =
+    snap.val();
+
+  const now =
+    Date.now();
 
   update(matchRef,{
-    elapsed:(d.elapsed||0)+(now-d.startTime),
+    elapsed:
+      (d.elapsed||0)
+      + (now-d.startTime),
+
     startTime:null,
     isRunning:false
   });
 
 };
 
+/* RESET */
 window.reset = () => {
 
   update(matchRef,{
@@ -398,7 +540,7 @@ window.reset = () => {
 
 };
 
-/* RESET TIEMPO */
+/* RESET TIME */
 window.resetTime = () => {
 
   update(matchRef,{
@@ -406,16 +548,6 @@ window.resetTime = () => {
     startTime:null,
     isRunning:false
   });
-
-};
-
-/* MOSTRAR PLANTILLA */
-window.toggleRoster = () => {
-
-  const checked = document.getElementById("showRoster").checked;
-
-  document.getElementById("rosterBox").style.display =
-    checked ? "block" : "none";
 
 };
 
@@ -436,9 +568,11 @@ window.togglePenaltyControls = async () => {
 
 window.hidePenalties = () => {
 
-  document.getElementById("enablePenalties").checked = false;
+  document.getElementById("enablePenalties").checked =
+    false;
 
-  document.getElementById("penaltyBox").style.display = "none";
+  document.getElementById("penaltyBox").style.display =
+    "none";
 
   update(matchRef,{
     penaltiesEnabled:false
@@ -454,17 +588,21 @@ window.resetPenalties = () => {
     penaltiesB:[]
   });
 
-  document.getElementById("enablePenalties").checked = false;
+  document.getElementById("enablePenalties").checked =
+    false;
 
-  document.getElementById("penaltyBox").style.display = "none";
+  document.getElementById("penaltyBox").style.display =
+    "none";
 
 };
 
 window.penaltyGoalA = async () => {
 
-  const snap = await get(matchRef);
+  const snap =
+    await get(matchRef);
 
-  const arr = snap.val()?.penaltiesA || [];
+  const arr =
+    snap.val()?.penaltiesA || [];
 
   arr.push("goal");
 
@@ -477,9 +615,11 @@ window.penaltyGoalA = async () => {
 
 window.penaltyMissA = async () => {
 
-  const snap = await get(matchRef);
+  const snap =
+    await get(matchRef);
 
-  const arr = snap.val()?.penaltiesA || [];
+  const arr =
+    snap.val()?.penaltiesA || [];
 
   arr.push("miss");
 
@@ -492,9 +632,11 @@ window.penaltyMissA = async () => {
 
 window.penaltyGoalB = async () => {
 
-  const snap = await get(matchRef);
+  const snap =
+    await get(matchRef);
 
-  const arr = snap.val()?.penaltiesB || [];
+  const arr =
+    snap.val()?.penaltiesB || [];
 
   arr.push("goal");
 
@@ -507,9 +649,11 @@ window.penaltyGoalB = async () => {
 
 window.penaltyMissB = async () => {
 
-  const snap = await get(matchRef);
+  const snap =
+    await get(matchRef);
 
-  const arr = snap.val()?.penaltiesB || [];
+  const arr =
+    snap.val()?.penaltiesB || [];
 
   arr.push("miss");
 
@@ -521,54 +665,61 @@ window.penaltyMissB = async () => {
 };
 
 /* UI */
-const scoreEl = document.getElementById("score");
-const timeEl = document.getElementById("time");
-const penaltyBox = document.getElementById("penaltyBox");
-const enablePenalties = document.getElementById("enablePenalties");
+const scoreEl =
+  document.getElementById("score");
+
+const timeEl =
+  document.getElementById("time");
 
 let data = null;
 
 function format(ms){
 
-  const s = Math.floor(ms/1000);
+  const s =
+    Math.floor(ms/1000);
 
-  return String(Math.floor(s/60)).padStart(2,'0')
-    + ":"
-    + String(s%60).padStart(2,'0');
+  return String(
+    Math.floor(s/60)
+  ).padStart(2,'0')
+  + ":"
+  + String(
+    s%60
+  ).padStart(2,'0');
 
 }
 
-onValue(matchRef, snap=>{
+/* FIREBASE */
+onValue(matchRef,snap=>{
 
-  data = snap.val();
+  data =
+    snap.val();
 
   if(!data) return;
 
   scoreEl.innerText =
     `${data.scoreA||0} - ${data.scoreB||0}`;
 
-  const enabled = data.penaltiesEnabled || false;
-
-  enablePenalties.checked = enabled;
-
-  penaltyBox.style.display =
-    enabled ? "block" : "none";
-
 });
 
+/* TIMER */
 setInterval(()=>{
 
   if(!data) return;
 
-  let t = data.elapsed || 0;
+  let t =
+    data.elapsed || 0;
 
-  if(data.isRunning && data.startTime){
+  if(
+    data.isRunning &&
+    data.startTime
+  ){
 
     t += Date.now() - data.startTime;
 
   }
 
-  timeEl.innerText = format(t);
+  timeEl.innerText =
+    format(t);
 
 },100);
 
