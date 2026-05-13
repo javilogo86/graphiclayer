@@ -96,6 +96,7 @@ body{
   font-size:34px;
   font-weight:bold;
   letter-spacing:4px;
+
   opacity:0;
   transform:scale(1.2);
   pointer-events:none;
@@ -118,42 +119,51 @@ body{
     opacity:0;
     transform:scale(1.25);
   }
+
   100%{
     opacity:1;
     transform:scale(1);
   }
 }
 
-/* FOTO JUGADOR */
+/* GOLEADOR */
 .player-goal-box{
-  margin-top:10px;
   display:none;
   align-items:center;
-  gap:18px;
-  background:rgba(0,0,0,.82);
+  gap:16px;
+
+  background:rgba(0,0,0,.85);
+
+  border-radius:18px;
+
   padding:14px 18px;
-  border-radius:16px;
+
   width:max-content;
+
   backdrop-filter:blur(6px);
 
   opacity:0;
+
   transform:translateY(20px);
 }
 
 .player-goal-box.show{
   display:flex;
-  animation:playerIn .5s ease forwards;
+  animation:playerIn .45s ease forwards;
 }
 
 @keyframes playerIn{
+
   from{
     opacity:0;
     transform:translateY(20px);
   }
+
   to{
     opacity:1;
     transform:translateY(0);
   }
+
 }
 
 .player-photo{
@@ -172,14 +182,14 @@ body{
 }
 
 .player-goal-title{
-  font-size:16px;
+  font-size:15px;
   color:#ffcc00;
   font-weight:bold;
   letter-spacing:1px;
 }
 
 .player-name{
-  font-size:28px;
+  font-size:30px;
   font-weight:bold;
   color:white;
   margin-top:4px;
@@ -246,6 +256,7 @@ body{
 
 <div class="overlay">
 
+<!-- MARCADOR -->
 <div class="top-row">
 
   <div class="time-box" id="time">
@@ -254,7 +265,7 @@ body{
 
   <div class="score-container">
 
-    <div class="score-box" id="scoreBox">
+    <div class="score-box">
 
       <div class="team" id="teamA">
         AAAA
@@ -272,6 +283,7 @@ body{
 
     </div>
 
+    <!-- GOOOOL -->
     <div
       id="goalOverlay"
       class="goal-overlay"
@@ -292,7 +304,7 @@ body{
 
 </div>
 
-<!-- FOTO GOLEADOR -->
+<!-- GOLEADOR -->
 <div
   class="player-goal-box"
   id="playerGoalBox"
@@ -382,6 +394,7 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+/* FIREBASE */
 const app = initializeApp({
   databaseURL:
   "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
@@ -428,7 +441,7 @@ const penTeamA =
 const penTeamB =
   document.getElementById("penTeamB");
 
-/* FOTO GOLEADOR */
+/* GOLEADOR */
 const playerGoalBox =
   document.getElementById("playerGoalBox");
 
@@ -445,57 +458,11 @@ let data = null;
 
 let lastEventId = null;
 
-/*
-  BASE JUGADORES + FOTO
-  EXTRAIDAS DE LA WEB
-*/
-
-const playersDB = {
-
-  "A":[
-    {
-      name:"Gerard Castillejo",
-      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
-    },
-    {
-      name:"Biel López",
-      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
-    },
-    {
-      name:"Jared García",
-      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
-    },
-    {
-      name:"Thiago Oliva",
-      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
-    },
-    {
-      name:"Álvaro Pérez",
-      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
-    }
-  ],
-
-  "B":[
-    {
-      name:"Eros Forzinetti",
-      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
-    },
-    {
-      name:"Xavi Alguersuari",
-      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
-    },
-    {
-      name:"Felipe",
-      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
-    }
-  ]
-
-};
-
 /* TIEMPO */
 function format(ms){
 
-  const s = Math.floor(ms/1000);
+  const s =
+    Math.floor(ms/1000);
 
   return String(
     Math.floor(s/60)
@@ -507,6 +474,7 @@ function format(ms){
 
 }
 
+/* NOMBRE CORTO */
 function short(n){
 
   return n?.substring(0,4).toUpperCase()
@@ -527,37 +495,31 @@ function showGoal(){
   setTimeout(()=>{
 
     goalOverlay.classList.remove("show");
+
     goalOverlay.classList.add("reset");
 
   },1600);
 
 }
 
-/* FOTO GOLEADOR */
-function showPlayer(team){
+/* GOLEADOR */
+function showPlayer(player,team){
 
-  const arr =
-    playersDB[team] || [];
-
-  if(arr.length === 0) return;
-
-  /*
-    jugador aleatorio
-  */
-
-  const player =
-    arr[Math.floor(Math.random()*arr.length)];
+  if(!player) return;
 
   playerPhoto.src =
-    player.photo;
+    player.photo || "";
 
   playerName.innerText =
-    player.name;
+    player.name || "Jugador";
 
   playerTeam.innerText =
     team === "A"
     ? data.teamA || "TEAM A"
     : data.teamB || "TEAM B";
+
+  playerGoalBox.style.display =
+    "flex";
 
   playerGoalBox.classList.remove("show");
 
@@ -573,7 +535,10 @@ function showPlayer(team){
       playerGoalBox.classList.remove("show");
 
       setTimeout(()=>{
-        playerGoalBox.style.display = "none";
+
+        playerGoalBox.style.display =
+          "none";
+
       },400);
 
     },5000);
@@ -592,11 +557,13 @@ function renderPenalties(container,arr){
 
     dot.classList.add("dot");
 
-    if(p==="goal")
+    if(p === "goal"){
       dot.classList.add("goal");
+    }
 
-    if(p==="miss")
+    if(p === "miss"){
       dot.classList.add("miss");
+    }
 
     container.appendChild(dot);
 
@@ -605,10 +572,12 @@ function renderPenalties(container,arr){
 }
 
 /* FIREBASE */
-onValue(matchRef, snap=>{
+onValue(matchRef,snap=>{
 
-  data = snap.val() || {};
+  data =
+    snap.val() || {};
 
+  /* EQUIPOS */
   teamAEl.innerText =
     short(data.teamA);
 
@@ -621,6 +590,7 @@ onValue(matchRef, snap=>{
   penTeamB.innerText =
     short(data.teamB);
 
+  /* RESULTADO */
   scoreAEl.innerText =
     data.scoreA ?? 0;
 
@@ -654,11 +624,23 @@ onValue(matchRef, snap=>{
 
       showGoal();
 
-      showPlayer(event.team);
+      /*
+        MOSTRAR JUGADOR
+      */
+
+      if(event.player){
+
+        showPlayer(
+          event.player,
+          event.team
+        );
+
+      }
 
     }
 
-    lastEventId = event.id;
+    lastEventId =
+      event.id;
 
   }
 
@@ -704,7 +686,9 @@ setInterval(()=>{
     data.startTime
   ){
 
-    t += Date.now() - data.startTime;
+    t +=
+      Date.now()
+      - data.startTime;
 
   }
 
