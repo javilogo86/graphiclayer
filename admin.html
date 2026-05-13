@@ -127,6 +127,10 @@ input{
   font-size:16px;
 }
 
+.hidden{
+  display:none;
+}
+
 </style>
 </head>
 
@@ -137,13 +141,19 @@ input{
 <input id="teamA" placeholder="Equipo A">
 <input id="teamB" placeholder="Equipo B">
 
-<button class="blue" onclick="setTeams()">
+<button
+  class="blue"
+  onclick="setTeams()"
+>
 Guardar equipos
 </button>
 
 <div class="period-selector">
 
-<select id="periodSelect" onchange="setPeriod()">
+<select
+  id="periodSelect"
+  onchange="setPeriod()"
+>
 <option value="single">1 Parte</option>
 <option value="1T">1T</option>
 <option value="2T">2T</option>
@@ -151,34 +161,43 @@ Guardar equipos
 
 </div>
 
-<div class="score" id="score">
+<div
+  class="score"
+  id="score"
+>
 0 - 0
 </div>
 
-<div class="time" id="time">
+<div
+  class="time"
+  id="time"
+>
 00:00
 </div>
 
 <!-- GOLEADORES -->
-<div class="goal-player-box">
+<div
+  class="goal-player-box hidden"
+  id="goalPlayerBox"
+>
 
 <div class="goal-player-title">
-⚽ Selección de goleadores
+⚽ Goleador RCDE
 </div>
 
 <div class="player-select-row">
 
 <label>
-RCDE
+Jugador RCDE
 </label>
 
-<select id="playerASelect">
+<select id="rcdePlayerSelect">
 
 <option value="">
 Seleccionar jugador
 </option>
 
-<option value="Gerard Castillejo|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+<option value="Gerard Castillejo|https://www.rcdespanyol.com/uploads/_images/employee/3612/resized/143680_backendGallery.png">
 Gerard Castillejo
 </option>
 
@@ -186,44 +205,44 @@ Gerard Castillejo
 Biel López
 </option>
 
-<option value="Jared García|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+<option value="Jared García|https://www.rcdespanyol.com/uploads/_images/employee/3614/resized/143682_backendGallery.png">
 Jared García
 </option>
 
-<option value="Thiago Oliva|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+<option value="Thiago Oliva|https://www.rcdespanyol.com/uploads/_images/employee/3615/resized/143683_backendGallery.png">
 Thiago Oliva
 </option>
 
-<option value="Álvaro Pérez|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+<option value="Álvaro Pérez|https://www.rcdespanyol.com/uploads/_images/employee/3617/resized/143684_backendGallery.png">
 Álvaro Pérez
 </option>
 
-</select>
-
-</div>
-
-<div class="player-select-row">
-
-<label>
-Jugador Equipo B
-</label>
-
-<select id="playerBSelect">
-
-<option value="">
-Seleccionar jugador
+<option value="Jaume Delgado|https://www.rcdespanyol.com/uploads/_images/employee/3618/resized/143685_backendGallery.png">
+Jaume Delgado
 </option>
 
-<option value="Eros Forzinetti|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+<option value="Hugo López|https://www.rcdespanyol.com/uploads/_images/employee/4054/resized/143686_backendGallery.png">
+Hugo López
+</option>
+
+<option value="Modric Márquez|https://www.rcdespanyol.com/uploads/_images/employee/3620/resized/143687_backendGallery.png">
+Modric Márquez
+</option>
+
+<option value="Sergio R.|https://www.rcdespanyol.com/uploads/_images/employee/3733/resized/143688_backendGallery.png">
+Sergio R.
+</option>
+
+<option value="Felipe|https://www.rcdespanyol.com/uploads/_images/employee/4053/resized/143689_backendGallery.png">
+Felipe
+</option>
+
+<option value="Eros Forzinetti|https://www.rcdespanyol.com/uploads/_images/employee/3621/resized/143690_backendGallery.png">
 Eros Forzinetti
 </option>
 
-<option value="Xavi Alguersuari|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
+<option value="Xavi Alguersuari|https://www.rcdespanyol.com/uploads/_images/employee/3622/resized/143691_backendGallery.png">
 Xavi Alguersuari
-</option>
-
-<option value="Felipe|https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png">
-Felipe
 </option>
 
 </select>
@@ -234,35 +253,59 @@ Felipe
 
 <div class="grid">
 
-<button class="green" onclick="goalA()">
+<button
+  class="green"
+  onclick="goalA()"
+>
 + A
 </button>
 
-<button class="green" onclick="goalB()">
+<button
+  class="green"
+  onclick="goalB()"
+>
 + B
 </button>
 
-<button class="red" onclick="minusA()">
+<button
+  class="red"
+  onclick="minusA()"
+>
 - A
 </button>
 
-<button class="red" onclick="minusB()">
+<button
+  class="red"
+  onclick="minusB()"
+>
 - B
 </button>
 
-<button class="blue" onclick="start()">
+<button
+  class="blue"
+  onclick="start()"
+>
 ▶ Start
 </button>
 
-<button class="red" onclick="pause()">
+<button
+  class="red"
+  onclick="pause()"
+>
 ⏸ Pause
 </button>
 
-<button class="gray" onclick="reset()">
+<button
+  class="gray"
+  onclick="reset()"
+>
 Reset
 </button>
 
-<button class="gray" onclick="resetTime()">
+<button
+  class="gray"
+  onclick="resetTime()"
+>
 Reset Time
 </button>
 
@@ -283,7 +326,10 @@ Reset Time
 
 </div>
 
-<div class="penalty-box" id="penaltyBox">
+<div
+  class="penalty-box"
+  id="penaltyBox"
+>
 
 <h2>
 ⚽ Tanda de Penaltis
@@ -361,12 +407,67 @@ const db = getDatabase(app);
 
 const matchRef = ref(db,"match");
 
+/* UI */
+const scoreEl =
+  document.getElementById("score");
+
+const timeEl =
+  document.getElementById("time");
+
+const goalPlayerBox =
+  document.getElementById("goalPlayerBox");
+
+let data = null;
+
 /* EVENTO */
 function newEvent(){
 
   return Date.now()
     + "-"
     + Math.random().toString(16).slice(2);
+
+}
+
+/* DETECTAR RCDE */
+function detectRCDETeam(){
+
+  const teamA =
+    document.getElementById("teamA").value
+    .trim()
+    .toUpperCase();
+
+  const teamB =
+    document.getElementById("teamB").value
+    .trim()
+    .toUpperCase();
+
+  if(teamA.includes("RCDE")){
+    return "A";
+  }
+
+  if(teamB.includes("RCDE")){
+    return "B";
+  }
+
+  return null;
+
+}
+
+/* MOSTRAR SELECT RCDE */
+function updateRCDESelector(){
+
+  const rcdeTeam =
+    detectRCDETeam();
+
+  if(rcdeTeam){
+
+    goalPlayerBox.classList.remove("hidden");
+
+  }else{
+
+    goalPlayerBox.classList.add("hidden");
+
+  }
 
 }
 
@@ -394,23 +495,34 @@ window.setPeriod = () => {
 
 };
 
+/* OBTENER JUGADOR RCDE */
+function getSelectedPlayer(){
+
+  const selected =
+    document.getElementById("rcdePlayerSelect").value;
+
+  if(!selected) return null;
+
+  const parts =
+    selected.split("|");
+
+  return {
+    name:parts[0],
+    photo:parts[1]
+  };
+
+}
+
 /* GOL A */
 window.goalA = async () => {
 
-  const selected =
-    document.getElementById("playerASelect").value;
+  const rcdeTeam =
+    detectRCDETeam();
 
   let playerData = null;
 
-  if(selected){
-
-    const parts = selected.split("|");
-
-    playerData = {
-      name:parts[0],
-      photo:parts[1]
-    };
-
+  if(rcdeTeam === "A"){
+    playerData = getSelectedPlayer();
   }
 
   await runTransaction(
@@ -432,20 +544,13 @@ window.goalA = async () => {
 /* GOL B */
 window.goalB = async () => {
 
-  const selected =
-    document.getElementById("playerBSelect").value;
+  const rcdeTeam =
+    detectRCDETeam();
 
   let playerData = null;
 
-  if(selected){
-
-    const parts = selected.split("|");
-
-    playerData = {
-      name:parts[0],
-      photo:parts[1]
-    };
-
+  if(rcdeTeam === "B"){
+    playerData = getSelectedPlayer();
   }
 
   await runTransaction(
@@ -480,17 +585,22 @@ window.minusB = () =>
 /* EQUIPOS */
 window.setTeams = () => {
 
-  update(matchRef,{
-    teamA:
-      document.getElementById("teamA").value,
+  const teamA =
+    document.getElementById("teamA").value;
 
-    teamB:
-      document.getElementById("teamB").value
+  const teamB =
+    document.getElementById("teamB").value;
+
+  update(matchRef,{
+    teamA,
+    teamB
   });
+
+  updateRCDESelector();
 
 };
 
-/* START */
+/* TIMER */
 window.start = () => {
 
   update(matchRef,{
@@ -500,7 +610,6 @@ window.start = () => {
 
 };
 
-/* PAUSE */
 window.pause = async () => {
 
   const snap =
@@ -540,7 +649,7 @@ window.reset = () => {
 
 };
 
-/* RESET TIME */
+/* RESET TIEMPO */
 window.resetTime = () => {
 
   update(matchRef,{
@@ -664,15 +773,7 @@ window.penaltyMissB = async () => {
 
 };
 
-/* UI */
-const scoreEl =
-  document.getElementById("score");
-
-const timeEl =
-  document.getElementById("time");
-
-let data = null;
-
+/* FORMATO TIEMPO */
 function format(ms){
 
   const s =
@@ -714,7 +815,9 @@ setInterval(()=>{
     data.startTime
   ){
 
-    t += Date.now() - data.startTime;
+    t +=
+      Date.now()
+      - data.startTime;
 
   }
 
