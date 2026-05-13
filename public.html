@@ -5,6 +5,7 @@
 <title>Overlay Champions</title>
 
 <style>
+
 html,
 body{
   margin:0;
@@ -23,6 +24,7 @@ body{
   gap:10px;
 }
 
+/* FILA SUPERIOR */
 .top-row{
   display:flex;
   align-items:center;
@@ -82,7 +84,7 @@ body{
   background:red;
 }
 
-/* ===== GOAL FIX ROBUSTO ===== */
+/* GOAL */
 .goal-overlay{
   position:absolute;
   inset:0;
@@ -94,20 +96,17 @@ body{
   font-size:34px;
   font-weight:bold;
   letter-spacing:4px;
-
   opacity:0;
   transform:scale(1.2);
   pointer-events:none;
 }
 
-/* estado activo */
 .goal-overlay.show{
   opacity:1;
   transform:scale(1);
   animation:goalIn .45s ease forwards;
 }
 
-/* reset forzado */
 .goal-overlay.reset{
   animation:none;
   opacity:0;
@@ -115,8 +114,81 @@ body{
 }
 
 @keyframes goalIn{
-  0%{opacity:0; transform:scale(1.25);}
-  100%{opacity:1; transform:scale(1);}
+  0%{
+    opacity:0;
+    transform:scale(1.25);
+  }
+  100%{
+    opacity:1;
+    transform:scale(1);
+  }
+}
+
+/* FOTO JUGADOR */
+.player-goal-box{
+  margin-top:10px;
+  display:none;
+  align-items:center;
+  gap:18px;
+  background:rgba(0,0,0,.82);
+  padding:14px 18px;
+  border-radius:16px;
+  width:max-content;
+  backdrop-filter:blur(6px);
+
+  opacity:0;
+  transform:translateY(20px);
+}
+
+.player-goal-box.show{
+  display:flex;
+  animation:playerIn .5s ease forwards;
+}
+
+@keyframes playerIn{
+  from{
+    opacity:0;
+    transform:translateY(20px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.player-photo{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  object-fit:cover;
+  border:4px solid white;
+  background:#222;
+}
+
+.player-info{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+
+.player-goal-title{
+  font-size:16px;
+  color:#ffcc00;
+  font-weight:bold;
+  letter-spacing:1px;
+}
+
+.player-name{
+  font-size:28px;
+  font-weight:bold;
+  color:white;
+  margin-top:4px;
+}
+
+.player-team{
+  font-size:18px;
+  color:#00ffcc;
+  margin-top:4px;
 }
 
 /* PENALTIS */
@@ -159,8 +231,13 @@ body{
   box-shadow:0 0 4px rgba(0,0,0,.8);
 }
 
-.dot.goal{ background:#00ff66; }
-.dot.miss{ background:#ff2222; }
+.dot.goal{
+  background:#00ff66;
+}
+
+.dot.miss{
+  background:#ff2222;
+}
 
 </style>
 </head>
@@ -171,13 +248,17 @@ body{
 
 <div class="top-row">
 
-  <div class="time-box" id="time">00:00</div>
+  <div class="time-box" id="time">
+    00:00
+  </div>
 
   <div class="score-container">
 
     <div class="score-box" id="scoreBox">
 
-      <div class="team" id="teamA">AAAA</div>
+      <div class="team" id="teamA">
+        AAAA
+      </div>
 
       <div>
         <span id="scoreA">0</span>
@@ -185,34 +266,105 @@ body{
         <span id="scoreB">0</span>
       </div>
 
-      <div class="team" id="teamB">BBBB</div>
+      <div class="team" id="teamB">
+        BBBB
+      </div>
 
     </div>
 
-    <div id="goalOverlay" class="goal-overlay">
+    <div
+      id="goalOverlay"
+      class="goal-overlay"
+    >
       <span>GOOOOOOL</span>
     </div>
 
   </div>
 
-  <div class="period-box hide" id="periodBox">1T</div>
+  <div
+    class="period-box hide"
+    id="periodBox"
+  >
+    1T
+  </div>
 
   <div class="red-bar"></div>
 
 </div>
 
+<!-- FOTO GOLEADOR -->
+<div
+  class="player-goal-box"
+  id="playerGoalBox"
+>
+
+<img
+  id="playerPhoto"
+  class="player-photo"
+  src=""
+>
+
+<div class="player-info">
+
+  <div class="player-goal-title">
+    GOLEADOR
+  </div>
+
+  <div
+    class="player-name"
+    id="playerName"
+  >
+    Jugador
+  </div>
+
+  <div
+    class="player-team"
+    id="playerTeam"
+  >
+    Equipo
+  </div>
+
+</div>
+
+</div>
+
 <!-- PENALTIS -->
-<div class="penalties" id="penaltiesBox">
+<div
+  class="penalties"
+  id="penaltiesBox"
+>
 
-  <div class="penalty-row">
-    <div class="penalty-team" id="penTeamA">TEAM A</div>
-    <div class="penalty-dots" id="dotsA"></div>
+<div class="penalty-row">
+
+  <div
+    class="penalty-team"
+    id="penTeamA"
+  >
+    TEAM A
   </div>
 
-  <div class="penalty-row">
-    <div class="penalty-team" id="penTeamB">TEAM B</div>
-    <div class="penalty-dots" id="dotsB"></div>
+  <div
+    class="penalty-dots"
+    id="dotsA"
+  ></div>
+
+</div>
+
+<div class="penalty-row">
+
+  <div
+    class="penalty-team"
+    id="penTeamB"
+  >
+    TEAM B
   </div>
+
+  <div
+    class="penalty-dots"
+    id="dotsB"
+  ></div>
+
+</div>
 
 </div>
 
@@ -220,46 +372,149 @@ body{
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+
+import {
+  getDatabase,
+  ref,
+  onValue
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const app = initializeApp({
-  databaseURL: "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
+  databaseURL:
+  "https://marcador-3de21-default-rtdb.europe-west1.firebasedatabase.app/"
 });
 
 const db = getDatabase(app);
+
 const matchRef = ref(db,"match");
 
 /* ELEMENTOS */
-const teamAEl = document.getElementById("teamA");
-const teamBEl = document.getElementById("teamB");
-const scoreAEl = document.getElementById("scoreA");
-const scoreBEl = document.getElementById("scoreB");
-const timeEl = document.getElementById("time");
-const periodBox = document.getElementById("periodBox");
+const teamAEl =
+  document.getElementById("teamA");
 
-const goalOverlay = document.getElementById("goalOverlay");
+const teamBEl =
+  document.getElementById("teamB");
 
-const penaltiesBox = document.getElementById("penaltiesBox");
-const dotsA = document.getElementById("dotsA");
-const dotsB = document.getElementById("dotsB");
-const penTeamA = document.getElementById("penTeamA");
-const penTeamB = document.getElementById("penTeamB");
+const scoreAEl =
+  document.getElementById("scoreA");
+
+const scoreBEl =
+  document.getElementById("scoreB");
+
+const timeEl =
+  document.getElementById("time");
+
+const periodBox =
+  document.getElementById("periodBox");
+
+const goalOverlay =
+  document.getElementById("goalOverlay");
+
+const penaltiesBox =
+  document.getElementById("penaltiesBox");
+
+const dotsA =
+  document.getElementById("dotsA");
+
+const dotsB =
+  document.getElementById("dotsB");
+
+const penTeamA =
+  document.getElementById("penTeamA");
+
+const penTeamB =
+  document.getElementById("penTeamB");
+
+/* FOTO GOLEADOR */
+const playerGoalBox =
+  document.getElementById("playerGoalBox");
+
+const playerPhoto =
+  document.getElementById("playerPhoto");
+
+const playerName =
+  document.getElementById("playerName");
+
+const playerTeam =
+  document.getElementById("playerTeam");
 
 let data = null;
+
 let lastEventId = null;
 
-/* FORMATO TIEMPO */
+/*
+  BASE JUGADORES + FOTO
+  EXTRAIDAS DE LA WEB
+*/
+
+const playersDB = {
+
+  "A":[
+    {
+      name:"Gerard Castillejo",
+      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
+    },
+    {
+      name:"Biel López",
+      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
+    },
+    {
+      name:"Jared García",
+      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
+    },
+    {
+      name:"Thiago Oliva",
+      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
+    },
+    {
+      name:"Álvaro Pérez",
+      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
+    }
+  ],
+
+  "B":[
+    {
+      name:"Eros Forzinetti",
+      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
+    },
+    {
+      name:"Xavi Alguersuari",
+      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
+    },
+    {
+      name:"Felipe",
+      photo:"https://www.rcdespanyol.com/uploads/media/default/0001/31/thumb_30031_default_player.png"
+    }
+  ]
+
+};
+
+/* TIEMPO */
 function format(ms){
+
   const s = Math.floor(ms/1000);
-  return String(Math.floor(s/60)).padStart(2,'0') + ":" + String(s%60).padStart(2,'0');
+
+  return String(
+    Math.floor(s/60)
+  ).padStart(2,'0')
+  + ":"
+  + String(
+    s%60
+  ).padStart(2,'0');
+
 }
 
 function short(n){
-  return n?.substring(0,4).toUpperCase() || "----";
+
+  return n?.substring(0,4).toUpperCase()
+    || "----";
+
 }
 
-/* 🔥 GOAL FIABLE */
+/* GOAL */
 function showGoal(){
 
   goalOverlay.classList.remove("show");
@@ -270,25 +525,83 @@ function showGoal(){
   goalOverlay.classList.add("show");
 
   setTimeout(()=>{
+
     goalOverlay.classList.remove("show");
     goalOverlay.classList.add("reset");
+
   },1600);
+
+}
+
+/* FOTO GOLEADOR */
+function showPlayer(team){
+
+  const arr =
+    playersDB[team] || [];
+
+  if(arr.length === 0) return;
+
+  /*
+    jugador aleatorio
+  */
+
+  const player =
+    arr[Math.floor(Math.random()*arr.length)];
+
+  playerPhoto.src =
+    player.photo;
+
+  playerName.innerText =
+    player.name;
+
+  playerTeam.innerText =
+    team === "A"
+    ? data.teamA || "TEAM A"
+    : data.teamB || "TEAM B";
+
+  playerGoalBox.classList.remove("show");
+
+  void playerGoalBox.offsetWidth;
+
+  playerGoalBox.classList.add("show");
+
+  clearTimeout(window.goalPlayerTimeout);
+
+  window.goalPlayerTimeout =
+    setTimeout(()=>{
+
+      playerGoalBox.classList.remove("show");
+
+      setTimeout(()=>{
+        playerGoalBox.style.display = "none";
+      },400);
+
+    },5000);
 
 }
 
 /* PENALTIS */
 function renderPenalties(container,arr){
+
   container.innerHTML = "";
 
   arr.forEach(p=>{
-    const dot = document.createElement("div");
+
+    const dot =
+      document.createElement("div");
+
     dot.classList.add("dot");
 
-    if(p==="goal") dot.classList.add("goal");
-    if(p==="miss") dot.classList.add("miss");
+    if(p==="goal")
+      dot.classList.add("goal");
+
+    if(p==="miss")
+      dot.classList.add("miss");
 
     container.appendChild(dot);
+
   });
+
 }
 
 /* FIREBASE */
@@ -296,59 +609,107 @@ onValue(matchRef, snap=>{
 
   data = snap.val() || {};
 
-  teamAEl.innerText = short(data.teamA);
-  teamBEl.innerText = short(data.teamB);
+  teamAEl.innerText =
+    short(data.teamA);
 
-  penTeamA.innerText = short(data.teamA);
-  penTeamB.innerText = short(data.teamB);
+  teamBEl.innerText =
+    short(data.teamB);
 
-  scoreAEl.innerText = data.scoreA ?? 0;
-  scoreBEl.innerText = data.scoreB ?? 0;
+  penTeamA.innerText =
+    short(data.teamA);
+
+  penTeamB.innerText =
+    short(data.teamB);
+
+  scoreAEl.innerText =
+    data.scoreA ?? 0;
+
+  scoreBEl.innerText =
+    data.scoreB ?? 0;
 
   /* PERIODO */
   if(data.periodMode === "halves"){
+
     periodBox.classList.remove("hide");
-    periodBox.innerText = data.period || "1T";
-  } else {
+
+    periodBox.innerText =
+      data.period || "1T";
+
+  }else{
+
     periodBox.classList.add("hide");
+
   }
 
-  /* GOAL EVENT */
-  const event = data.lastEvent;
+  /* EVENTO GOL */
+  const event =
+    data.lastEvent;
 
-  if(event && event.id !== lastEventId){
+  if(
+    event &&
+    event.id !== lastEventId
+  ){
+
     if(event.type === "goal"){
+
       showGoal();
+
+      showPlayer(event.team);
+
     }
+
     lastEventId = event.id;
+
   }
 
   /* PENALTIS */
   if(data.penaltiesEnabled){
+
     penaltiesBox.classList.add("show");
-    renderPenalties(dotsA, data.penaltiesA || []);
-    renderPenalties(dotsB, data.penaltiesB || []);
-  } else {
+
+    renderPenalties(
+      dotsA,
+      data.penaltiesA || []
+    );
+
+    renderPenalties(
+      dotsB,
+      data.penaltiesB || []
+    );
+
+  }else{
+
     penaltiesBox.classList.remove("show");
+
   }
 
 });
 
-/* TIMER SIEMPRE VISIBLE */
+/* TIMER */
 setInterval(()=>{
 
   if(!data){
+
     timeEl.innerText = "00:00";
+
     return;
+
   }
 
-  let t = data.elapsed || 0;
+  let t =
+    data.elapsed || 0;
 
-  if(data.isRunning && data.startTime){
+  if(
+    data.isRunning &&
+    data.startTime
+  ){
+
     t += Date.now() - data.startTime;
+
   }
 
-  timeEl.innerText = format(t);
+  timeEl.innerText =
+    format(t);
 
 },100);
 
