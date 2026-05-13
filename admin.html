@@ -16,13 +16,23 @@ body {
   padding: 20px;
 }
 
-h1 { font-size: 22px; }
+h1 { 
+  font-size: 22px; 
+}
 
-.score { font-size: 60px; margin: 20px 0; }
+.score { 
+  font-size: 60px; 
+  margin: 20px 0; 
+}
 
-.time { font-size: 40px; color: #00ffcc; }
+.time { 
+  font-size: 40px; 
+  color: #00ffcc; 
+}
 
-.period-selector{ margin:20px 0; }
+.period-selector{ 
+  margin:20px 0; 
+}
 
 select{
   width:100%;
@@ -60,6 +70,7 @@ input{
   margin:5px 0;
   border-radius:6px;
   border:none;
+  box-sizing:border-box;
 }
 
 .penalty-box{
@@ -67,6 +78,25 @@ input{
   border:2px solid #333;
   border-radius:16px;
   padding:20px;
+  display:none;
+}
+
+.checkbox-container{
+  margin-top:25px;
+  background:#1b1b1b;
+  padding:18px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  font-size:18px;
+}
+
+.checkbox-container input{
+  width:24px;
+  height:24px;
+  margin:0;
 }
 </style>
 </head>
@@ -107,14 +137,21 @@ input{
 
 </div>
 
+<!-- CHECK HABILITAR PENALTIS -->
+<div class="checkbox-container">
+<input type="checkbox" id="enablePenalties" onchange="togglePenaltyControls()">
+<label for="enablePenalties">⚽ Habilitar Penaltis</label>
+</div>
+
 <!-- PENALTIS -->
-<div class="penalty-box">
+<div class="penalty-box" id="penaltyBox">
+
 <h2>⚽ Tanda de Penaltis</h2>
 
 <div class="grid">
 
-<button class="orange" onclick="togglePenalties()">Mostrar / Ocultar</button>
 <button class="gray" onclick="resetPenalties()">Reset Penaltis</button>
+<button class="orange" onclick="hidePenalties()">Ocultar Penaltis</button>
 
 <button class="green" onclick="penaltyGoalA()">Gol A</button>
 <button class="red" onclick="penaltyMissA()">Fallo A</button>
@@ -123,11 +160,13 @@ input{
 <button class="red" onclick="penaltyMissB()">Fallo B</button>
 
 </div>
+
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+
 import {
   getDatabase,
   ref,
@@ -151,19 +190,33 @@ function newEvent(){
 
 /* PERIODOS */
 window.setPeriod = () => {
+
   const value = document.getElementById("periodSelect").value;
 
   if(value === "single"){
-    update(matchRef,{ periodMode:"single", period:null });
+
+    update(matchRef,{
+      periodMode:"single",
+      period:null
+    });
+
   }else{
-    update(matchRef,{ periodMode:"halves", period:value });
+
+    update(matchRef,{
+      periodMode:"halves",
+      period:value
+    });
+
   }
 };
 
-/* 🔥 GOLES CORREGIDOS */
+/* GOLES */
 window.goalA = async () => {
 
-  await runTransaction(ref(db,"match/scoreA"), n => (n||0)+1);
+  await runTransaction(
+    ref(db,"match/scoreA"),
+    n => (n||0)+1
+  );
 
   update(matchRef,{
     lastEvent:{
@@ -177,7 +230,10 @@ window.goalA = async () => {
 
 window.goalB = async () => {
 
-  await runTransaction(ref(db,"match/scoreB"), n => (n||0)+1);
+  await runTransaction(
+    ref(db,"match/scoreB"),
+    n => (n||0)+1
+  );
 
   update(matchRef,{
     lastEvent:{
@@ -189,25 +245,37 @@ window.goalB = async () => {
 
 };
 
-/* RESTO IGUAL */
+/* RESTAR GOLES */
 window.minusA = () =>
-  runTransaction(ref(db,"match/scoreA"), n => Math.max((n||0)-1,0));
+  runTransaction(
+    ref(db,"match/scoreA"),
+    n => Math.max((n||0)-1,0)
+  );
 
 window.minusB = () =>
-  runTransaction(ref(db,"match/scoreB"), n => Math.max((n||0)-1,0));
+  runTransaction(
+    ref(db,"match/scoreB"),
+    n => Math.max((n||0)-1,0)
+  );
 
+/* EQUIPOS */
 window.setTeams = () => {
+
   update(matchRef,{
     teamA:document.getElementById("teamA").value,
     teamB:document.getElementById("teamB").value
   });
+
 };
 
+/* TIMER */
 window.start = () => {
+
   update(matchRef,{
     startTime:Date.now(),
     isRunning:true
   });
+
 };
 
 window.pause = async () => {
@@ -226,6 +294,7 @@ window.pause = async () => {
 };
 
 window.reset = () => {
+
   update(matchRef,{
     scoreA:0,
     scoreB:0,
@@ -237,80 +306,157 @@ window.reset = () => {
     penaltiesA:[],
     penaltiesB:[]
   });
+
 };
 
 window.resetTime = () => {
+
   update(matchRef,{
     elapsed:0,
     startTime:null,
     isRunning:false
   });
+
 };
 
-/* PENALTIS */
-window.togglePenalties = async () => {
-  const snap = await get(matchRef);
+/* HABILITAR / DESHABILITAR PENALTIS */
+window.togglePenaltyControls = async () => {
+
+  const enabled = document.getElementById("enablePenalties").checked;
+
+  document.getElementById("penaltyBox").style.display =
+    enabled ? "block" : "none";
+
   update(matchRef,{
-    penaltiesEnabled:!snap.val()?.penaltiesEnabled
+    penaltiesEnabled:enabled
   });
+
 };
 
+/* OCULTAR PENALTIS */
+window.hidePenalties = () => {
+
+  document.getElementById("enablePenalties").checked = false;
+
+  document.getElementById("penaltyBox").style.display = "none";
+
+  update(matchRef,{
+    penaltiesEnabled:false
+  });
+
+};
+
+/* RESET PENALTIS */
 window.resetPenalties = () => {
+
   update(matchRef,{
     penaltiesEnabled:false,
     penaltiesA:[],
     penaltiesB:[]
   });
+
+  document.getElementById("enablePenalties").checked = false;
+  document.getElementById("penaltyBox").style.display = "none";
+
 };
 
+/* PENALTIS A */
 window.penaltyGoalA = async () => {
+
   const snap = await get(matchRef);
+
   const arr = snap.val()?.penaltiesA || [];
+
   arr.push("goal");
 
-  update(matchRef,{ penaltiesEnabled:true, penaltiesA:arr });
+  update(matchRef,{
+    penaltiesEnabled:true,
+    penaltiesA:arr
+  });
+
 };
 
 window.penaltyMissA = async () => {
+
   const snap = await get(matchRef);
+
   const arr = snap.val()?.penaltiesA || [];
+
   arr.push("miss");
 
-  update(matchRef,{ penaltiesEnabled:true, penaltiesA:arr });
+  update(matchRef,{
+    penaltiesEnabled:true,
+    penaltiesA:arr
+  });
+
 };
 
+/* PENALTIS B */
 window.penaltyGoalB = async () => {
+
   const snap = await get(matchRef);
+
   const arr = snap.val()?.penaltiesB || [];
+
   arr.push("goal");
 
-  update(matchRef,{ penaltiesEnabled:true, penaltiesB:arr });
+  update(matchRef,{
+    penaltiesEnabled:true,
+    penaltiesB:arr
+  });
+
 };
 
 window.penaltyMissB = async () => {
+
   const snap = await get(matchRef);
+
   const arr = snap.val()?.penaltiesB || [];
+
   arr.push("miss");
 
-  update(matchRef,{ penaltiesEnabled:true, penaltiesB:arr });
+  update(matchRef,{
+    penaltiesEnabled:true,
+    penaltiesB:arr
+  });
+
 };
 
 /* UI */
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
+const penaltyBox = document.getElementById("penaltyBox");
+const enablePenalties = document.getElementById("enablePenalties");
 
 let data = null;
 
 function format(ms){
+
   const s = Math.floor(ms/1000);
-  return String(Math.floor(s/60)).padStart(2,'0') + ":" + String(s%60).padStart(2,'0');
+
+  return String(Math.floor(s/60)).padStart(2,'0')
+    + ":"
+    + String(s%60).padStart(2,'0');
+
 }
 
 onValue(matchRef, snap=>{
+
   data = snap.val();
+
   if(!data) return;
 
-  scoreEl.innerText = `${data.scoreA||0} - ${data.scoreB||0}`;
+  scoreEl.innerText =
+    `${data.scoreA||0} - ${data.scoreB||0}`;
+
+  /* SINCRONIZAR CHECK PENALTIS */
+  const enabled = data.penaltiesEnabled || false;
+
+  enablePenalties.checked = enabled;
+
+  penaltyBox.style.display =
+    enabled ? "block" : "none";
+
 });
 
 setInterval(()=>{
@@ -320,7 +466,9 @@ setInterval(()=>{
   let t = data.elapsed || 0;
 
   if(data.isRunning && data.startTime){
+
     t += Date.now() - data.startTime;
+
   }
 
   timeEl.innerText = format(t);
